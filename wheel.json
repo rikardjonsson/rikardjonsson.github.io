@@ -1,0 +1,97 @@
+[
+      {
+        "name": "Fresh",
+        "children": [
+          {
+            "name": "Citrus",
+            "children": [
+
+              {
+                "name": "Citrus", "colour": "#EDFF0F"
+              },
+              {
+                "name": "Fruity", "colour": "#80FF0F"
+              },
+              {
+                "name": "Green", "colour": "#09AB0F"
+              },
+              {
+                "name": "Water", "colour": "#09ABE2"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Soft",
+        "children": [
+          {
+            "name": "Floral Fruity", 
+            "children": [
+              {
+                "name": "Floral", "colour": "#7D7F75"
+              },
+              {
+                "name": "Soft Floral", "colour": "#DA727E"
+              },
+              {
+                "name": "Floral Oriental", "colour": "#C0C4B4"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Rich",
+        "children": [
+          {
+            "name": "Vanilla",
+            "children": [
+              {
+                "name": "Soft Oriental", "colour": "#8A3978"
+              },
+              {
+                "name": "Oriental", "colour": "#D156B6"
+              }
+            ]
+          },
+          {
+            "name": "Musk",
+            "children": [
+              {
+                "name": "Woody Oriental", "colour": "#5C4133"
+              },
+              {
+                "name": "Woods", "colour": "#946952"
+              },
+              {
+                "name": "Mossy Woods", "colour": "#D69877"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Active",
+        "children": [
+          {
+            "name": "Woody",
+            "children": [
+              {
+                "name": "Dry Woods", "colour": "#F1E3E2"
+              }
+            ]
+          },
+          {
+            "name": "Herbacous",
+            "children": [
+              {
+                "name": "[fougere]", "colour": "#9E9594"
+              }
+            ]
+          }
+        ]
+      }
+  
+  
+]
