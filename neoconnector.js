@@ -1,7 +1,5 @@
 /* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * javascript to connect to neo4j and return similar fragrances
  */
 
 
@@ -15,9 +13,10 @@ function searchFragrance() {
     url: serverURL + "/cypher",
     accepts: "application/json",
     dataType: "json",
-    //headers: { 
-      //"X-Stream": "true"    
-    //},
+    contentType:"application/json",
+    headers: { 
+      "X-Stream": "true"    
+    },
     data:JSON.stringify({ "query" : cypherQuery }),
     success: function(data, textStatus, jqXHR){
      console.log(data);
