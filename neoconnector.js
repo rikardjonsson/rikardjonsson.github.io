@@ -12,7 +12,7 @@ function searchFragrance() {
     type:"POST",
     url: serverURL + "/cypher",
     accepts: "application/json",
-    dataType: "json",
+    dataType: "jsonp",
     contentType:"application/json",
     headers: { 
       "X-Stream": "true"    
