@@ -15,7 +15,6 @@ function searchFragrance() {
     url: serverURL + "/cypher",
     accepts: "application/json",
     dataType: "json",
-    contentType:"application/json",
     headers: { 
       "X-Stream": "true"    
     },
