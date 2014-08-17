@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>odeur kind sir</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="js/jquery/jquery.js" type="text/javascript"></script>
+        <script src="js/neoconnector.js" type="text/javascript"></script>
+        <!--<script src="js/visualizeGraph.js" type="text/javascript"></script>-->
+       
+        <link href="css/bootstrap.css" rel="stylesheet" type="text/css"/>
+        <link href="css/bootstrap-responsive.css" rel="stylesheet" type="text/css"/>
+    </head>
+    <body>
+        
+        <br/><br/>
+        <div class="container">
+            <div class="container">
+                <h1>odeur kind sir (beta)</h1>
+                <div class="container">
+                    <div class="input-group">
+
+                        <input type="text" class="form-control" placeholder="Search" id="searchFragInput">
+
+
+                    </div>
+                </div>
+                
+        </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-default" onclick="searchFragrance();">Search</button>
+                <button type="button" class="btn btn-default" onclick="listFragrance();">List</button>
+                </div>
+        </div>
+        <div class="container">
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading"><h2>Similar Fragrances</h2></div>
+
+            <div class="badge-info" id="notify">
+                
+            </div>
+            <!-- Table -->
+            <div class="row">
+                <div class="col-md-8">
+                    <table class="table table-hover table-condensed" id="result">
+              
+                    </table>
+                </div>
+            </div>    
+        </div>
+            </div>
+        <script src="js/bootstrap.js" type="text/javascript"></script>
+        <script src="js/bootstrap.min.js" type="text/javascript"></script>
+        <script src="js/d3/d3.v3.js" type="text/javascript"></script>
+        
+    </body>
+
+</html>

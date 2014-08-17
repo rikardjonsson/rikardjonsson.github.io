@@ -1,5 +1,7 @@
 /* 
- * javascript to connect to neo4j and return similar fragrances
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 
 
@@ -7,7 +9,7 @@ function searchFragrance() {
   /*$("#result").val('');*/
   var fragrenceName = $("#searchFragInput").val();
   var cypherQuery = "MATCH (p:Perfume)-[:smell]->(n:note)<-[:smell]-(p2:Perfume) WHERE p.title = '"+fragrenceName+"' AND NOT p=p2 RETURN p2.title AS name, p2.brand, count(*) AS similarity ORDER BY similarity DESC limit 999";
-  var serverURL = "http://app27890640:itRYoUIUabfBj7zVvPrD@app27890640.sb02.stations.graphenedb.com:24789/db/data";
+  var serverURL = "http://localhost:7474/db/data";
   $.ajax({
     type:"POST",
     url: serverURL + "/cypher",
