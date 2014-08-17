@@ -1,12 +1,157 @@
-{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf190
-{\fonttbl\f0\fnil\fcharset0 Monaco;}
-{\colortbl;\red255\green255\blue255;\red242\green239\blue236;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
-\deftab720
-\pard\pardeftab720\sl480
-
-\f0\fs32 \cf0 \cb2 \shad\shadx0\shady-20\shadr0\shado255 \shadc0 \{\
-    "require": \{\
-        "monolog/monolog": "1.0.*"\
-    \}\
-\}}
+{
+    "name": "vendor-name/project-name",
+    "description": "This is a very cool package!",
+    "version": "0.3.0",
+    "type": "library",
+    "keywords": ["logging", "cool", "awesome"],
+    "homepage": "http://jolicode.com",
+    "time": "2012-12-21",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Xavier Lacot",
+            "email": "xlacot@jolicode.com",
+            "homepage": "http://www.lacot.org",
+            "role": "Developer"
+        },
+        {
+            "name": "Benjamin Clay",
+            "email": "bclay@jolicode.com",
+            "homepage": "http://ternel.net",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "support@exemple.org",
+        "issues": "https://github.com/jolicode/GouvCamp-mobile/issues",
+        "forum": "http://www.my-forum.com/",
+        "wiki": "http://www.my-wiki.com/",
+        "irc": "irc://irc.freenode.org/composer",
+        "source": "https://github.com/jolicode/GouvCamp-mobile"
+    },
+    "require": {
+        "monolog/monolog": "1.0.*",
+        "joli/ternel": "@dev",
+        "acme/foo": "dev-master#2eb0c0978d290a1c45346a1955188929cb4e5db7"
+    },
+    "require-dev": {
+        "debug/dev-only": "1.0.*"
+    },
+    "conflict": {
+        "another-vendor/conflict": "1.0.*"
+    },
+    "replace": {
+        "debug/dev-only": "1.0.*"
+    },
+    "provide": {
+        "debug/dev-only": "1.0.*"
+    },
+    "suggest": {
+        "monolog/monolog": "Allows more advanced logging of the application flow"
+    },
+    "autoload": {
+        "psr-4": {
+            "Monolog\\": "src/",
+            "Vendor\\Namespace\\": ""
+        },
+        "psr-0": {
+            "Monolog": "src/",
+            "Vendor\\Namespace": ["src/", "lib/"],
+            "Pear_Style": "src/",
+            "": "src/"
+        },
+        "classmap": ["src/", "lib/", "Something.php"],
+        "files": ["src/MyLibrary/functions.php"]
+    },
+    "autoload-dev": {
+        "psr-0": {
+            "MyPackage\\Tests": "test/"
+        }
+    },
+    "target-dir": "Symfony/Component/Yaml",
+    "minimum-stability": "stable",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://packages.example.com"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/Seldaek/monolog"
+        },
+        {
+            "type": "pear",
+            "url": "http://pear2.php.net"
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "smarty/smarty",
+                "version": "3.1.7",
+                "dist": {
+                    "url": "http://www.smarty.net/files/Smarty-3.1.7.zip",
+                    "type": "zip"
+                },
+                "source": {
+                    "url": "http://smarty-php.googlecode.com/svn/",
+                    "type": "svn",
+                    "reference": "tags/Smarty_3_1_7/distribution/"
+                }
+            }
+        }
+    ],
+    "config": {
+        "process-timeout": 300,
+        "use-include-path": false,
+        "preferred-install": "auto",
+        "github-protocols": ["git", "https", "http"],
+        "github-oauth": {"github.com": "oauthtoken"},
+        "github-domains": ["github.com"],
+        "http-basic": {"toto.org": {"username": "foo", "password": "bar"},
+        "store-auths": "prompt",
+        "autoloader-suffix": "pony",
+        "optimize-autoloader": true,
+        "prepend-autoloader": true,
+        "vendor-dir": "vendor",
+        "bin-dir": "bin",
+        "cache-dir": "$home/cache",
+        "cache-files-dir": "$cache-dir/files",
+        "cache-repo-dir": "$cache-dir/repo",
+        "cache-vcs-dir": "$cache-dir/vcs",
+        "cache-files-ttl": 15552000,
+        "cache-files-maxsize": "300MiB",
+        "notify-on-install": true,
+        "discard-changes": false
+    },
+    "archive": {
+        "exclude": ["/foo/bar", "baz", "/*.test", "!/foo/bar/baz"]
+    },
+    "prefer-stable": true,
+    "scripts": {
+        "pre-install-cmd": "MyVendor\\MyClass::doSomething",
+        "post-install-cmd": [
+            "MyVendor\\MyClass::warmCache",
+            "phpunit -c app/"
+        ],
+        "pre-update-cmd": "MyVendor\\MyClass::doSomething",
+        "post-update-cmd": "MyVendor\\MyClass::doSomething",
+        "pre-status-cmd": "MyVendor\\MyClass::doSomething",
+        "post-status-cmd": "MyVendor\\MyClass::doSomething",
+        "pre-package-install": "MyVendor\\MyClass::doSomething",
+        "post-package-install": [
+            "MyVendor\\MyClass::postPackageInstall"
+        ],
+        "pre-package-update": "MyVendor\\MyClass::doSomething",
+        "post-package-update": "MyVendor\\MyClass::doSomething",
+        "pre-package-uninstall": "MyVendor\\MyClass::doSomething",
+        "post-package-uninstall": "MyVendor\\MyClass::doSomething",
+        "pre-autoload-dump": "MyVendor\\MyClass::doSomething",
+        "post-autoload-dump": "MyVendor\\MyClass::doSomething",
+        "post-root-package-install": "MyVendor\\MyClass::doSomething",
+        "post-create-project-cmd": "MyVendor\\MyClass::doSomething",
+        "pre-archive-cmd": "MyVendor\\MyClass::doSomething",
+        "post-archive-cmd": "MyVendor\\MyClass::doSomething",
+    },
+    "extra": { "key": "value" },
+    "bin": ["./bin/toto"]
+}
