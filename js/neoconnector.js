@@ -51,7 +51,7 @@ function searchFragrance() {
   /*$("#result").val('');*/
   var fragrenceName = $("#searchFragInput").val();
   var cypherQuery = "MATCH (b:brand)-[:belongs_to]-(p:Perfume) where b.name = '"+fragrenceName+"' return b.name, p.title ";
-  var serverURL = "http://localhost:7474/db/data";
+  var serverURL = "http://app27890640:itRYoUIUabfBj7zVvPrD@app27890640.sb02.stations.graphenedb.com:24789/db/data";
   $.ajax({
     type:"POST",
     url: serverURL + "/cypher",
