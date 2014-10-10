@@ -1,0 +1,50 @@
+body {
+background-color: lightgray;
+}
+
+h1 { 
+font-family: Amatic SC, Arial, serif; 
+font-weight: 100; 
+font-size: 80px;
+margin: 0px;
+text-align: center;
+} 
+
+h2 { 
+font-family: Amatic SC, Arial, serif; 
+font-weight: 100; 
+font-size: 24px; 
+text-align: center;
+color: #2B2B2B;
+margin: 0px;
+} 
+
+a {
+text-decoration: none;
+color:#2B2B2B;
+}
+
+#page-wrap {
+width: 800px;
+margin: 0 auto;
+text-align: center;
+}
+
+#playlist-container{
+margin: 15px; 
+}
+
+.button {
+    background-color: #ccc;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius:6px;
+    color: #fff;
+    font-family: 'Amatic SC';
+    font-size: 24px;
+    text-decoration: none;
+    cursor: pointer;
+    border:none;
+}
+
+
