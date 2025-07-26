@@ -1,86 +1,124 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { useState } from "react";
-
-const weekPlan = [
-  { day: "Måndag", kcal: 2250, focus: "Ren start, högt protein för att sätta tonen", meals: ["Huel Black (2 skopor)", "Linsbiffar med bulgur och sallad", "Bönpasta med tomatsås och vegofärs"], training: "Spinning 45 min", tip: "Fokusera på bra hållning och tydliga mål idag – sätt tonen för hela veckan." },
-  { day: "Tisdag", kcal: 2300, focus: "Balans efter måndag – kolhydrater för återhämtning", meals: ["Grekisk yoghurt med bär och frön", "Tofuwok med ris", "Stekt tempeh med grönsaker och råris"], training: "HIIT 45 min", tip: "Jobba med tempo och teknik – håll intensiteten utan att stressa." },
-  { day: "Onsdag", kcal: 2250, focus: "Volym och näring – fyll på utan att spräcka kaloribudgeten", meals: ["Huel Black", "Kikärtssallad med ägg och bröd", "Vegetarisk lasagne med grönsallad"], training: "Spinning 45 min", tip: "Halvvägs – håll fokus, du bygger nu momentum, inte trötthet." },
-  { day: "Torsdag", kcal: 2200, focus: "Mitten av veckan – bromsa sug och energidippar med fiber och fettbalans", meals: ["Yoghurt med banan och kanel", "Halloumi med quinoa och rostade grönsaker", "Kikärtsgryta med blomkålsris"], training: "HIIT 45 min", tip: "Mental trötthet? Påminn dig om varför du gör det här. Disciplin nu = lättare fredag." },
-  { day: "Fredag (vin)", kcal: 2000, focus: "Lätt mat under dagen – så du kan dricka vin och känna dig stolt", meals: ["Huel Black + kokt ägg", "Spenatsallad med ägg och feta", "Grillade grönsaker + ugnsbakade ägg + lite ost"], training: "Spinning 45 min (18:00)", tip: "Njut av vinet – du har förtjänat det. Men håll det classy, inte kaos." },
-  { day: "Lördag", kcal: 2300, focus: "Återhämtning – du har njutit igår, idag bygger du upp igen", meals: ["Yoghurt med äpple och valnötter", "Tofu med sobanudlar och broccoli", "Linssoppa med rostat bröd"], training: "HIIT Double Set 08:00", tip: "Ta ett iskallt glas vatten direkt på morgonen. Återställ och dominera dagen." },
-  { day: "Söndag", kcal: 2100, focus: "Återställning eller förberedelse – välj en lugn dag eller kör Huel hela dagen", meals: ["Huel Black eller lätt frukost", "Omelett med grönsaker", "Tofuburgare med sötpotatis och sallad"], training: "Spinning 09:00", tip: "Reflektera. Hur kändes veckan? Vad kan du göra ännu bättre nästa?" }
-];
-
-export default function WeeklyFatLossPlan() {
-  const [completed, setCompleted] = useState<string[]>([]);
-  const toggleComplete = (day: string) => {
-    setCompleted((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    );
-  };
-  const totalCalories = weekPlan.reduce((sum, d) => sum + d.kcal, 0);
-  const trainingDays = weekPlan.filter((d) => d.training).length;
-
-  return (
-    <div className="bg-white p-6 max-w-6xl mx-auto space-y-8">
-      <header className="text-center">
-        <h1 className="text-4xl font-bold mb-2">Veckoplan: Träning & Kost</h1>
-        <p className="text-gray-600">Designad för fettminskning, hög energi och ett starkt mindset.</p>
-      </header>
-
-      <section className="bg-gray-50 p-4 rounded-xl border">
-        <h2 className="text-xl font-semibold mb-2">Sammanställning</h2>
-        <ul className="text-sm text-gray-700 list-disc list-inside">
-          <li><strong>Totalt kaloriintag:</strong> {totalCalories} kcal</li>
-          <li><strong>Genomsnitt/dag:</strong> {(totalCalories / 7).toFixed(0)} kcal</li>
-          <li><strong>Träningsdagar:</strong> {trainingDays} / 7</li>
-          <li><strong>Avklarade dagar:</strong> {completed.length} / 7</li>
-        </ul>
-      </section>
-
-      <section className="bg-white p-4 rounded-xl border">
-        <h2 className="text-xl font-semibold mb-2">Kaloriöversikt</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={weekPlan}>
-            <XAxis dataKey="day" />
-            <YAxis domain={[1900, 2400]} />
-            <Tooltip formatter={(value) => `${value} kcal`} />
-            <Line type="monotone" dataKey="kcal" stroke="#4f46e5" strokeWidth={2} dot={{ r: 4 }} />
-          </LineChart>
-        </ResponsiveContainer>
-      </section>
-
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {weekPlan.map((day) => (
-          <Card key={day.day} className={completed.includes(day.day) ? "bg-green-50 border-green-300" : "bg-white"}>
-            <CardContent className="p-4 space-y-2">
-              <h3 className="text-2xl font-semibold">{day.day}</h3>
-              <p className="italic text-gray-600">{day.focus}</p>
-              <p className="text-sm text-gray-500">💡 {day.tip}</p>
-              <p><strong>Träning:</strong> {day.training}</p>
-              <div>
-                <strong>Måltider:</strong>
-                <ul className="list-disc list-inside text-sm">
-                  {day.meals.map((meal, i) => <li key={i}>{meal}</li>)}
-                </ul>
-              </div>
-              <p className="text-sm">Totalt: ≈ {day.kcal} kcal</p>
-              <Button
-                variant={completed.includes(day.day) ? "outline" : "default"}
-                onClick={() => toggleComplete(day.day)}
-              >
-                {completed.includes(day.day) ? "✔️ Klar" : "Markera som klar"}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </section>
-
-      <footer className="text-center text-gray-500 text-sm pt-6">
-        Disciplin är frihet. Du gör det här för dig själv – och du är på väg.
-      </footer>
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veckoäventyret: Kropp & Karaktär</title>
+  <style>
+    body {
+      margin: 0;
+      background: #1a1a1a;
+      color: #fceabb;
+      font-family: "Courier New", monospace;
+      font-size: 16px;
+    }
+    header {
+      background: #302f2f;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 4px solid #d4aa00;
+    }
+    header h1 {
+      font-size: 28px;
+      margin: 0;
+      color: #fff8dc;
+    }
+    .map {
+      background: url('https://upload.wikimedia.org/wikipedia/commons/3/3c/Pixel_landscape_example.png') no-repeat center;
+      background-size: cover;
+      height: 200px;
+      border-top: 4px solid #d4aa00;
+      border-bottom: 4px solid #d4aa00;
+    }
+    .content {
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+      background: #262424;
+      border: 2px solid #444;
+    }
+    .statblock {
+      background: #1e1d1d;
+      padding: 10px;
+      border: 2px solid #555;
+      margin-bottom: 16px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #ffdf5d;
+    }
+    .bar {
+      background: #333;
+      border: 1px solid #aaa;
+      height: 20px;
+      margin: 5px 0;
+    }
+    .bar-inner {
+      height: 100%;
+      background: #22dd66;
+    }
+    .footer {
+      text-align: center;
+      padding: 16px;
+      background: #151515;
+      color: #888;
+      font-size: 12px;
+    }
+    .ascii {
+      font-family: monospace;
+      white-space: pre;
+      font-size: 14px;
+      color: #70f070;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🗡️ Veckoäventyret: Kropp & Karaktär</h1>
+  </header>
+  <div class="map"></div>
+  <div class="content">
+    <div class="statblock">
+      <h2>🎽 Spelarstatus</h2>
+      <p>Namn: Rikard</p>
+      <p>Nivå: 7 (av 7 träningsdagar)</p>
+      <p>XP denna vecka: 2200/2300 kcal/dag</p>
+      <div class="bar"><div class="bar-inner" style="width: 95%"></div></div>
+      <p>Träningsuppdrag: Spinning × 3, HIIT × 4</p>
+      <p>Stegbonus: 15,000/dag (vardag), 10,000/dag (helg)</p>
     </div>
-  );
-}
+
+    <div class="statblock">
+      <h2>📊 Kaloriförbränning</h2>
+      <p>Måndag: 1050 kcal (450 träning + 600 steg)</p>
+      <p>Lördag: 1120 kcal (720 träning + 400 steg)</p>
+      <p>Snitt/dag: ~2600–3100 kcal</p>
+    </div>
+
+    <div class="statblock">
+      <h2>📋 Questlog</h2>
+      <ul>
+        <li>✅ Måndag: Huel + Linsbiffar + Spinning</li>
+        <li>✅ Tisdag: HIIT + Tofuwok + Tempeh</li>
+        <li>✅ Onsdag: Lasagne + Spinning</li>
+        <li>✅ Torsdag: HIIT + Kikärtsgryta</li>
+        <li>✅ Fredag: Lätt mat + vin + Spinning</li>
+        <li>✅ Lördag: HIIT dubbelset + nudlar</li>
+        <li>⏳ Söndag: Omelett + Tofuburgare + Spinning</li>
+      </ul>
+    </div>
+
+    <div class="statblock">
+      <h2>💬 Mentorens Visdom</h2>
+      <p class="ascii">
+        "Disciplin är inte att aldrig vika av.
+         Det är att alltid återvända.
+         Din kropp är ett äventyr – inte ett straff."
+      </p>
+    </div>
+  </div>
+  <div class="footer">
+    © 2025 – Rikard Quest Co. | Retro RPG UI homage to Secret of Mana
+  </div>
+</body>
+</html>
