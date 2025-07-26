@@ -70,6 +70,29 @@
       font-size: 14px;
       color: #70f070;
     }
+    .graph {
+      display: flex;
+      gap: 5px;
+      align-items: flex-end;
+      height: 150px;
+      margin-top: 10px;
+      background: #101010;
+      border: 1px solid #666;
+      padding: 10px;
+    }
+    .bar-col {
+      width: 10%;
+      background: #4caf50;
+      text-align: center;
+      font-size: 12px;
+      color: #fff;
+    }
+    .label {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      margin-top: 5px;
+      font-size: 10px;
+    }
   </style>
 </head>
 <body>
@@ -86,13 +109,21 @@
       <div class="bar"><div class="bar-inner" style="width: 95%"></div></div>
       <p>Träningsuppdrag: Spinning × 3, HIIT × 4</p>
       <p>Stegbonus: 15,000/dag (vardag), 10,000/dag (helg)</p>
+      <p>🌟 Moral: Hög – du har momentum. Håll det vid liv.</p>
     </div>
 
     <div class="statblock">
-      <h2>📊 Kaloriförbränning</h2>
-      <p>Måndag: 1050 kcal (450 träning + 600 steg)</p>
-      <p>Lördag: 1120 kcal (720 träning + 400 steg)</p>
-      <p>Snitt/dag: ~2600–3100 kcal</p>
+      <h2>📊 Kaloriförbränning – SNES-style!</h2>
+      <div class="graph">
+        <div class="bar-col" style="height: 80%">1050<div class="label">Mån</div></div>
+        <div class="bar-col" style="height: 90%">1140<div class="label">Tis</div></div>
+        <div class="bar-col" style="height: 85%">1050<div class="label">Ons</div></div>
+        <div class="bar-col" style="height: 90%">1140<div class="label">Tors</div></div>
+        <div class="bar-col" style="height: 80%">1050<div class="label">Fre</div></div>
+        <div class="bar-col" style="height: 100%">1120<div class="label">Lör</div></div>
+        <div class="bar-col" style="height: 75%">850<div class="label">Sön</div></div>
+      </div>
+      <p>🧮 Totalt: ca 7400 kcal förbränt på träning och steg den här veckan.</p>
     </div>
 
     <div class="statblock">
@@ -111,14 +142,16 @@
     <div class="statblock">
       <h2>💬 Mentorens Visdom</h2>
       <p class="ascii">
-        "Disciplin är inte att aldrig vika av.
-         Det är att alltid återvända.
-         Din kropp är ett äventyr – inte ett straff."
+        "Du är inte här för att överleva veckan.
+         Du är här för att bemästra den.
+         Låt varje repetition vara en attack.
+         Varje måltid en förtrollning.
+         Och varje morgon ett nytt kapitel."
       </p>
     </div>
   </div>
   <div class="footer">
-    © 2025 – Rikard Quest Co. | Retro RPG UI homage to Secret of Mana
+    © 2025 – Rikard Quest Co. | Retro RPG UI powered by viljestyrka, protein och XP
   </div>
 </body>
 </html>
