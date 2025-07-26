@@ -1,87 +1,89 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { useState } from "react";
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaloriförbränning – Veckoplan</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f9fafb;
+      color: #111827;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    canvas {
+      max-width: 800px;
+      margin: 2rem auto;
+      display: block;
+    }
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kaloriförbränning – Träning & Steg</h1>
+  <canvas id="burnChart" height="400"></canvas>
 
-const weekPlan = [
-  { day: "Måndag", kcal: 2250, focus: "Ren start, högt protein för att sätta tonen", meals: ["Huel Black (2 skopor)", "Linsbiffar med bulgur och sallad", "Bönpasta med tomatsås och vegofärs"], training: "Spinning 45 min", tip: "Fokusera på bra hållning och tydliga mål idag – sätt tonen för hela veckan." },
-  { day: "Tisdag", kcal: 2300, focus: "Balans efter måndag – kolhydrater för återhämtning", meals: ["Grekisk yoghurt med bär och frön", "Tofuwok med ris", "Stekt tempeh med grönsaker och råris"], training: "HIIT 45 min", tip: "Jobba med tempo och teknik – håll intensiteten utan att stressa." },
-  { day: "Onsdag", kcal: 2250, focus: "Volym och näring – fyll på utan att spräcka kaloribudgeten", meals: ["Huel Black", "Kikärtssallad med ägg och bröd", "Vegetarisk lasagne med grönsallad"], training: "Spinning 45 min", tip: "Halvvägs – håll fokus, du bygger nu momentum, inte trötthet." },
-  { day: "Torsdag", kcal: 2200, focus: "Mitten av veckan – bromsa sug och energidippar med fiber och fettbalans", meals: ["Yoghurt med banan och kanel", "Halloumi med quinoa och rostade grönsaker", "Kikärtsgryta med blomkålsris"], training: "HIIT 45 min", tip: "Mental trötthet? Påminn dig om varför du gör det här. Disciplin nu = lättare fredag." },
-  { day: "Fredag (vin)", kcal: 2000, focus: "Lätt mat under dagen – så du kan dricka vin och känna dig stolt", meals: ["Huel Black + kokt ägg", "Spenatsallad med ägg och feta", "Grillade grönsaker + ugnsbakade ägg + lite ost"], training: "Spinning 45 min (18:00)", tip: "Njut av vinet – du har förtjänat det. Men håll det classy, inte kaos." },
-  { day: "Lördag", kcal: 2300, focus: "Återhämtning – du har njutit igår, idag bygger du upp igen", meals: ["Yoghurt med äpple och valnötter", "Tofu med sobanudlar och broccoli", "Linssoppa med rostat bröd"], training: "HIIT Double Set 08:00", tip: "Ta ett iskallt glas vatten direkt på morgonen. Återställ och dominera dagen." },
-  { day: "Söndag", kcal: 2100, focus: "Återställning eller förberedelse – välj en lugn dag eller kör Huel hela dagen", meals: ["Huel Black eller lätt frukost", "Omelett med grönsaker", "Tofuburgare med sötpotatis och sallad"], training: "Spinning 09:00", tip: "Reflektera. Hur kändes veckan? Vad kan du göra ännu bättre nästa?" }
-];
+  <script>
+    const labels = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag (vin)", "Lördag", "Söndag"];
+    const trainingBurn = [450, 540, 450, 540, 450, 720, 450]; // i kcal
+    const stepBurn = [600, 600, 600, 600, 600, 400, 400]; // i kcal
 
-export default function WeeklyFatLossPlan() {
-  const [completed, setCompleted] = useState<string[]>([]);
-  const toggleComplete = (day: string) => {
-    setCompleted((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    );
-  };
-  const totalCalories = weekPlan.reduce((sum, d) => sum + d.kcal, 0);
-  const trainingDays = weekPlan.filter((d) => d.training).length;
+    const ctx = document.getElementById('burnChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Träning',
+            data: trainingBurn,
+            backgroundColor: '#4f46e5'
+          },
+          {
+            label: 'Steg',
+            data: stepBurn,
+            backgroundColor: '#10b981'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          },
+          legend: {
+            position: 'bottom'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Kalorier'
+            }
+          }
+        }
+      }
+    });
+  </script>
 
-  return (
-    <div className="bg-white p-6 max-w-6xl mx-auto space-y-8">
-      <header className="text-center">
-        <h1 className="text-4xl font-bold mb-2">Veckoplan: Träning & Kost</h1>
-        <p className="text-gray-600">Designad för fettminskning, hög energi och ett starkt mindset.</p>
-      </header>
-
-      <section className="bg-gray-50 p-4 rounded-xl border">
-        <h2 className="text-xl font-semibold mb-2">Sammanställning</h2>
-        <ul className="text-sm text-gray-700 list-disc list-inside">
-          <li><strong>Totalt kaloriintag:</strong> {totalCalories} kcal</li>
-          <li><strong>Genomsnitt/dag:</strong> {(totalCalories / 7).toFixed(0)} kcal</li>
-          <li><strong>Träningsdagar:</strong> {trainingDays} / 7</li>
-          <li><strong>Avklarade dagar:</strong> {completed.length} / 7</li>
-        </ul>
-      </section>
-
-      <section className="bg-white p-4 rounded-xl border">
-        <h2 className="text-xl font-semibold mb-2">Kaloriöversikt</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={weekPlan}>
-            <XAxis dataKey="day" />
-            <YAxis domain={[1900, 2400]} />
-            <Tooltip formatter={(value) => `${value} kcal`} />
-            <Line type="monotone" dataKey="kcal" stroke="#4f46e5" strokeWidth={2} dot={{ r: 4 }} />
-          </LineChart>
-        </ResponsiveContainer>
-      </section>
-
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {weekPlan.map((day) => (
-          <Card key={day.day} className={completed.includes(day.day) ? "bg-green-50 border-green-300" : "bg-white"}>
-            <CardContent className="p-4 space-y-2">
-              <h3 className="text-2xl font-semibold">{day.day}</h3>
-              <p className="italic text-gray-600">{day.focus}</p>
-              <p className="text-sm text-gray-500">💡 {day.tip}</p>
-              <p><strong>Träning:</strong> {day.training}</p>
-              <div>
-                <strong>Måltider:</strong>
-                <ul className="list-disc list-inside text-sm">
-                  {day.meals.map((meal, i) => <li key={i}>{meal}</li>)}
-                </ul>
-              </div>
-              <p className="text-sm">Totalt: ≈ {day.kcal} kcal</p>
-              <Button
-                variant={completed.includes(day.day) ? "outline" : "default"}
-                onClick={() => toggleComplete(day.day)}
-              >
-                {completed.includes(day.day) ? "✔️ Klar" : "Markera som klar"}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </section>
-
-      <footer className="text-center text-gray-500 text-sm pt-6">
-        Disciplin är frihet. Du gör det här för dig själv – och du är på väg.
-      </footer>
-    </div>
-  );
-}
-
+  <footer>
+    Du bränner ~2600–3100 kcal per dag. Disciplin varje dag gör skillnaden. 💪
+  </footer>
+</body>
+</html>
