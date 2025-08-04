@@ -187,7 +187,7 @@ struct WidgetContainerView: View {
     }
 
     private var effectiveAccentColor: Color {
-        if let colorString = container.theme?.accentColor {
+        if container.theme?.accentColor != nil {
             // TODO: Parse color string to Color
             return theme.accentColor
         }

@@ -268,10 +268,15 @@ final class SampleContent: WidgetContent, ObservableObject {
         isLoading = true
         error = nil
 
-        // Simulate network request
-        try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+        do {
+            // Simulate network request
+            try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+            lastUpdated = Date()
+        } catch {
+            self.error = error
+            throw error
+        }
 
-        lastUpdated = Date()
         isLoading = false
     }
 }

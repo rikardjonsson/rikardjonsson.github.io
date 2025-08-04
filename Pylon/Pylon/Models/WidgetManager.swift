@@ -41,8 +41,8 @@ class WidgetManager {
     func refreshAllWidgets() async {
         await withTaskGroup(of: Void.self) { group in
             for widget in widgets {
-                group.addTask {
-                    await self.refreshWidget(id: widget.id)
+                group.addTask { [weak self] in
+                    await self?.refreshWidget(id: widget.id)
                 }
             }
         }

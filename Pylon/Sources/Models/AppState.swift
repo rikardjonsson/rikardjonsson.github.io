@@ -55,7 +55,7 @@ class AppState: ObservableObject {
 
 // MARK: - Supporting Types
 
-enum WidgetLayout: Equatable, CaseIterable {
+enum WidgetLayout: Equatable, CaseIterable, Sendable {
     case grid(columns: Int)
     case list
     case masonry
@@ -77,7 +77,7 @@ enum WidgetLayout: Equatable, CaseIterable {
             .grid(columns: 3),
             .grid(columns: 4),
             .list,
-            .masonry,
+            .masonry
         ]
     }
 }

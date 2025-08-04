@@ -78,8 +78,8 @@ class WidgetManager: ObservableObject {
 
         await withTaskGroup(of: Void.self) { group in
             for containerId in enabledContainerIds {
-                group.addTask {
-                    await self.refreshContainer(id: containerId)
+                group.addTask { [weak self] in
+                    await self?.refreshContainer(id: containerId)
                 }
             }
         }
