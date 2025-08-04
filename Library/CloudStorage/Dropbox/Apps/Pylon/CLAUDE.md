@@ -10,6 +10,51 @@ This repository contains three main projects:
 2. **outdoor-gear-shop** - A Next.js 14 affiliate site for outdoor gear with SEO optimization and Amazon Associates API integration
 3. **Pylon** - A next-generation macOS productivity dashboard built with SwiftUI and Swift 6.0 that deeply integrates with the macOS ecosystem
 
+## Prompting Guidelines and Alignment Contract
+
+Many prompt failures stem from an **intent gap** between what users want and what they communicate. Contract-First Prompting provides a structured solution that ensures clarity and reduces back-and-forth iterations.
+
+### Contract-First Prompting Method
+
+This framework includes five key components that help establish clear expectations and deliverables:
+
+1. **Mission Definition** - Specify the exact task or outcome
+2. **Success Criteria** - Define measurable outcomes and requirements
+3. **Hard Constraints** - Establish technical and environmental limitations
+4. **Structured Clarification Loop** - Ensure comprehensive understanding before execution
+5. **Echo Check** - Confirm scope alignment through summarization
+
+### Template
+
+Use this template to structure high-quality prompts:
+
+```yaml
+prompt:
+  mission: "Describe the exact task or outcome you want Claude to accomplish"
+  success_criteria:
+    - "Bullet-point list of measurable outcomes or must-haves"
+    - "Any formatting, language, or tone preferences"
+  constraints:
+    - "Include any technical, environmental, or platform constraints"
+    - "Mention deadlines or performance expectations"
+  clarification_loop:
+    - "Claude should first list all unknowns before starting"
+    - "Claude should then ask one question at a time"
+    - "Claude should aim for ≥95% confidence before building"
+  echo_check: "Claude will summarize the scope in a single sentence and ask for confirmation"
+```
+
+### Effectiveness
+
+This method is token-efficient and particularly effective for:
+
+- **SwiftUI widget development** - Complex UI components with specific behavioral requirements
+- **Legacy Swift refactors** - Migration tasks requiring careful preservation of existing functionality  
+- **EventKit + AppleScript integration** - System integration work with precise API requirements
+- **Python CLI and framework design** - Structured development with clear architectural boundaries
+
+The Contract-First approach reduces ambiguity, minimizes iterations, and ensures deliverables align with expectations from the start.
+
 ## Common Development Commands
 
 ### SuperClaude (Python Project)
