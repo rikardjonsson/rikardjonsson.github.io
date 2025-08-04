@@ -112,11 +112,29 @@ struct MainContentView: View {
                 .foregroundColor(theme.textSecondary)
                 .multilineTextAlignment(.center)
 
-            Button("Add Sample Widget") {
-                addSampleWidget()
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    Button("Sample Widget") {
+                        addSampleWidget()
+                    }
+                    .buttonStyle(.bordered)
+                    
+                    Button("Clock") {
+                        addClockWidget()
+                    }
+                    .buttonStyle(.bordered)
+                    
+                    Button("Weather") {
+                        addWeatherWidget()
+                    }
+                    .buttonStyle(.bordered)
+                }
+                
+                Button("System Monitor") {
+                    addSystemMonitorWidget()
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
 
             // Show sample widgets in different sizes for demonstration
             sampleWidgetShowcase
@@ -168,6 +186,21 @@ struct MainContentView: View {
         let sampleWidget = SampleWidget()
         appState.widgetManager.registerContainer(sampleWidget)
     }
+    
+    private func addClockWidget() {
+        let clockWidget = ClockWidget()
+        appState.widgetManager.registerContainer(clockWidget)
+    }
+    
+    private func addWeatherWidget() {
+        let weatherWidget = WeatherWidget()
+        appState.widgetManager.registerContainer(weatherWidget)
+    }
+    
+    private func addSystemMonitorWidget() {
+        let systemWidget = SystemMonitorWidget()
+        appState.widgetManager.registerContainer(systemWidget)
+    }
 
     private func createSampleWidget(size: WidgetSize) -> SampleWidget {
         let widget = SampleWidget()
@@ -214,10 +247,6 @@ struct FooterView: View {
 
     var body: some View {
         HStack {
-            Text("Theme: \(appState.selectedTheme.name)")
-                .font(.caption)
-                .foregroundColor(theme.textSecondary)
-
             Spacer()
 
             Button("Toggle Theme") {
