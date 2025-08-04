@@ -104,7 +104,7 @@ final class NotesWidget: WidgetContainer, ObservableObject {
                                 .foregroundColor(theme.textPrimary)
                             VStack(spacing: 8) {
                                 ForEach(content.notes, id: \.id) { note in
-                                    noteRowDetailed(note, theme: theme)
+                                    self.noteRowDetailed(note, theme: theme)
                                 }
                             }
                             Spacer()
