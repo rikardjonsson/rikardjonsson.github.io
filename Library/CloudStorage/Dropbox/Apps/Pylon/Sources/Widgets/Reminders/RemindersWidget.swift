@@ -235,6 +235,7 @@ final class RemindersWidget: WidgetContainer, ObservableObject {
         }
     }
     
+    @ViewBuilder
     private func priorityBadge(_ count: Int, color: Color, theme: any Theme) -> some View {
         if count > 0 {
             Text("\(count)")
