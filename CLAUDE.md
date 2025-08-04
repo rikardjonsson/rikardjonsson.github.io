@@ -248,6 +248,115 @@ protocol Widget: Identifiable, Sendable {
 - **Accessibility**: Full VoiceOver support and keyboard navigation
 - **App Store**: Must comply with sandboxing and App Store guidelines
 
+## Pylon Architectural Principles
+
+### Design Philosophy
+Everything in Pylon is designed with **modularity and flexibility** in mind. As few components as possible should be hardcoded unless absolutely necessary. The architecture follows a container-based approach where widgets are interchangeable modules that can be dynamically configured, resized, and reordered.
+
+### Core Architectural Standards
+
+#### 1. Modularity & Flexibility
+- **Widget Container Architecture**: Every widget is designed as a container where content can be swapped dynamically
+- **Minimal Hardcoding**: Avoid hardcoded values; use configuration, themes, and dynamic sizing
+- **Protocol-Oriented Design**: Use protocols to define interfaces, enabling easy substitution and testing
+- **Dependency Injection**: Components should receive dependencies rather than creating them
+
+#### 2. Swift 6.0 & macOS 15 Standards
+- **Strict Concurrency**: All code must compile with Swift 6.0 strict concurrency enabled
+- **Actor Isolation**: Use `@MainActor` for UI components, dedicated actors for background work
+- **Sendable Compliance**: All shared data types must conform to `Sendable`
+- **Modern SwiftUI**: Leverage `@Observable`, `@State`, and latest SwiftUI patterns
+- **macOS 15 APIs**: Use latest frameworks (WeatherKit, EventKit, AppKit integration)
+
+#### 3. File Size Limits
+- **400-Line Maximum**: No file should exceed 400 lines of code
+- **Preferably Smaller**: Aim for files under 200 lines when possible
+- **Single Responsibility**: Each file should have one clear purpose
+- **Logical Separation**: Split large components into focused, smaller modules
+
+#### 4. Widget System Architecture
+
+**Dynamic Container System:**
+```swift
+protocol WidgetContainer {
+    var size: WidgetSize { get set }        // Small, Medium, Large, XLarge
+    var theme: WidgetTheme { get set }      // Color scheme adaptation
+    var content: any WidgetContent { get }  // Swappable content
+}
+
+enum WidgetSize: CaseIterable {
+    case small    // 1x1 grid units
+    case medium   // 2x1 grid units  
+    case large    // 2x2 grid units
+    case xlarge   // 4x2 grid units
+}
+```
+
+**Size Requirements:**
+- **Predefined Sizes**: Set amount of sizes (Small, Medium, Large, XLarge)
+- **Dynamic Switching**: Sizes can be changed via settings without losing data
+- **Grid Alignment**: All sizes align to a consistent grid system
+- **Responsive Content**: Content adapts gracefully to size changes
+
+#### 5. Grid-Based Layout System
+
+**Grid Specifications:**
+- **Consistent Grid**: All widgets follow a unified grid system (12-column base)
+- **Reorderable**: Widgets can be dragged and dropped to reorder
+- **Adaptive Colors**: Widgets adapt to different color schemes automatically
+- **Visual Consistency**: All widgets maintain visual harmony regardless of configuration
+
+**Layout Flexibility:**
+```swift
+struct WidgetLayout {
+    let columns: Int                    // Grid columns (2, 3, 4)
+    let spacing: CGFloat               // Inter-widget spacing
+    let padding: EdgeInsets            // Container padding
+    let allowedSizes: [WidgetSize]     // Permitted sizes for layout
+}
+```
+
+#### 6. Theme and Color Adaptation
+
+**Dynamic Theming:**
+- **Color Harmony**: Widgets automatically adapt to active theme
+- **Consistent Appearance**: Visual elements maintain consistency across themes
+- **Custom Overrides**: Individual widgets can have theme customizations
+- **System Integration**: Respect system appearance (light/dark mode)
+
+### Implementation Guidelines
+
+#### Widget Development Pattern:
+1. **Create Widget Protocol**: Define the widget interface
+2. **Implement Container**: Build the size-adaptive container
+3. **Add Content Module**: Create swappable content component
+4. **Theme Integration**: Ensure theme compatibility
+5. **Size Testing**: Test all supported sizes
+6. **Grid Validation**: Verify grid alignment and spacing
+
+#### File Organization:
+```
+Pylon/Sources/
+├── Models/           # Data models (<200 lines each)
+├── Views/            # UI components (<300 lines each)
+├── Widgets/          # Widget implementations
+│   ├── Calendar/     # CalendarWidget + components
+│   ├── Reminders/    # RemindersWidget + components
+│   └── Shared/       # Shared widget components
+├── Services/         # Background services (<400 lines each)
+└── Themes/           # Theme definitions (<200 lines each)
+```
+
+#### Quality Checkpoints:
+- [ ] File under 400 lines (preferably <200)
+- [ ] Widget supports all size configurations
+- [ ] Component works with all themes
+- [ ] Grid alignment maintained
+- [ ] Swift 6.0 strict concurrency compliance
+- [ ] No hardcoded values (use configuration)
+- [ ] Protocol-based interfaces used
+- [ ] macOS 15 APIs leveraged appropriately
+
 ## Testing Approaches
 
 ### SuperClaude
