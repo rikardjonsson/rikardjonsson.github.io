@@ -105,7 +105,7 @@ final class RemindersWidget: WidgetContainer, ObservableObject {
             
             VStack(spacing: 4) {
                 ForEach(Array(content.pendingTasks.prefix(4)), id: \.id) { task in
-                    taskRow(task, theme: theme, compact: true)
+                    self.taskRow(task, theme: theme, compact: true)
                 }
             }
             
@@ -133,7 +133,7 @@ final class RemindersWidget: WidgetContainer, ObservableObject {
             
             VStack(spacing: 6) {
                 ForEach(Array(content.pendingTasks.prefix(7)), id: \.id) { task in
-                    taskRow(task, theme: theme, compact: false)
+                    self.taskRow(task, theme: theme, compact: false)
                 }
             }
             
@@ -167,7 +167,7 @@ final class RemindersWidget: WidgetContainer, ObservableObject {
                 
                 VStack(spacing: 6) {
                     ForEach(content.pendingTasks, id: \.id) { task in
-                        taskRow(task, theme: theme, compact: false)
+                        self.taskRow(task, theme: theme, compact: false)
                     }
                 }
                 
@@ -187,7 +187,7 @@ final class RemindersWidget: WidgetContainer, ObservableObject {
                 
                 VStack(spacing: 6) {
                     ForEach(Array(content.completedTasks.prefix(8)), id: \.id) { task in
-                        taskRow(task, theme: theme, compact: true, showCompleted: true)
+                        self.taskRow(task, theme: theme, compact: true, showCompleted: true)
                     }
                 }
                 
@@ -244,9 +244,12 @@ final class RemindersWidget: WidgetContainer, ObservableObject {
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
                 .background(color, in: Capsule())
+        } else {
+            EmptyView()
         }
     }
     
+    @ViewBuilder
     private func priorityIndicator(_ priority: TaskPriority) -> some View {
         switch priority {
         case .high:

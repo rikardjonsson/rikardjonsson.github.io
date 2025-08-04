@@ -71,7 +71,7 @@ final class NotesWidget: WidgetContainer, ObservableObject {
                         }
                         VStack(spacing: 4) {
                             ForEach(Array(content.notes.prefix(3)), id: \.id) { note in
-                                noteRow(note, theme: theme, compact: true)
+                                self.noteRow(note, theme: theme, compact: true)
                             }
                         }
                         Spacer()
@@ -90,7 +90,7 @@ final class NotesWidget: WidgetContainer, ObservableObject {
                         }
                         VStack(spacing: 6) {
                             ForEach(Array(content.notes.prefix(5)), id: \.id) { note in
-                                noteRow(note, theme: theme, compact: false)
+                                self.noteRow(note, theme: theme, compact: false)
                             }
                         }
                         Spacer()

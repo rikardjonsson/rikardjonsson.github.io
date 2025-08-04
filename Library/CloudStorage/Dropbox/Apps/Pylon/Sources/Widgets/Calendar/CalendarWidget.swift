@@ -105,7 +105,7 @@ final class CalendarWidget: WidgetContainer, ObservableObject {
             
             VStack(spacing: 4) {
                 ForEach(Array(content.todayEvents.prefix(3)), id: \.id) { event in
-                    eventRow(event, theme: theme, compact: true)
+                    self.eventRow(event, theme: theme, compact: true)
                 }
             }
             
@@ -131,7 +131,7 @@ final class CalendarWidget: WidgetContainer, ObservableObject {
             
             VStack(spacing: 8) {
                 ForEach(Array(content.upcomingEvents.prefix(5)), id: \.id) { event in
-                    eventRow(event, theme: theme, compact: false)
+                    self.eventRow(event, theme: theme, compact: false)
                 }
             }
             
@@ -151,7 +151,7 @@ final class CalendarWidget: WidgetContainer, ObservableObject {
                 
                 VStack(spacing: 6) {
                     ForEach(content.todayEvents, id: \.id) { event in
-                        eventRow(event, theme: theme, compact: false)
+                        self.eventRow(event, theme: theme, compact: false)
                     }
                 }
                 
@@ -171,7 +171,7 @@ final class CalendarWidget: WidgetContainer, ObservableObject {
                 
                 VStack(spacing: 6) {
                     ForEach(Array(content.upcomingEvents.prefix(6)), id: \.id) { event in
-                        eventRow(event, theme: theme, compact: true)
+                        self.eventRow(event, theme: theme, compact: true)
                     }
                 }
                 
