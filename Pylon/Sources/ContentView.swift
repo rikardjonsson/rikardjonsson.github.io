@@ -5,7 +5,7 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            // Background with glass effect
+            // Background with material effect
             Rectangle()
                 .fill(appState.selectedTheme.backgroundMaterial)
                 .ignoresSafeArea()
@@ -44,6 +44,11 @@ struct HeaderView: View {
                 Text("Your productivity dashboard")
                     .font(.subheadline)
                     .foregroundColor(theme.textSecondary)
+                
+                Text("life is a circle because no one learns anything")
+                    .font(.caption)
+                    .foregroundColor(theme.textSecondary.opacity(0.8))
+                    .italic()
             }
             
             Spacer()
