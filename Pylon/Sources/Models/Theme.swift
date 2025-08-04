@@ -14,14 +14,14 @@ protocol Theme: Sendable {
 
 // MARK: - Theme Concrete Types
 enum ThemeType: CaseIterable, Sendable {
-    case glass
+    case modern
     case dark  
     case light
     case system
     
     var theme: any Theme {
         switch self {
-        case .glass: return GlassTheme()
+        case .modern: return ModernTheme()
         case .dark: return DarkTheme()
         case .light: return LightTheme()
         case .system: return SystemTheme()
@@ -29,9 +29,9 @@ enum ThemeType: CaseIterable, Sendable {
     }
 }
 
-// MARK: - Glass Theme
-struct GlassTheme: Theme {
-    let name = "Glass"
+// MARK: - Modern Theme
+struct ModernTheme: Theme {
+    let name = "Modern"
     let backgroundMaterial = Material.regularMaterial
     let primaryColor = Color.blue
     let secondaryColor = Color.blue.opacity(0.6)
@@ -83,7 +83,7 @@ struct SystemTheme: Theme {
 
 // MARK: - Theme Environment
 struct ThemeKey: EnvironmentKey {
-    static let defaultValue: any Theme = GlassTheme()
+    static let defaultValue: any Theme = ModernTheme()
 }
 
 extension EnvironmentValues {

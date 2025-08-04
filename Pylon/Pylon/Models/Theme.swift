@@ -13,15 +13,15 @@ protocol Theme {
 }
 
 extension Theme {
-    static let glass = GlassTheme()
+    static let modern = ModernTheme()
     static let dark = DarkTheme()
     static let light = LightTheme()
     static let system = SystemTheme()
 }
 
-// MARK: - Glass Theme
-struct GlassTheme: Theme {
-    let name = "Glass"
+// MARK: - Modern Theme
+struct ModernTheme: Theme {
+    let name = "Modern"
     let backgroundStyle = BackgroundStyle.regularMaterial
     let primaryColor = Color.blue
     let secondaryColor = Color.blue.opacity(0.6)
@@ -73,7 +73,7 @@ struct SystemTheme: Theme {
 
 // MARK: - Theme Environment
 struct ThemeKey: EnvironmentKey {
-    static let defaultValue: Theme = .glass
+    static let defaultValue: Theme = .modern
 }
 
 extension EnvironmentValues {

@@ -4,7 +4,7 @@ import Foundation
 @MainActor
 @Observable
 class AppState {
-    var selectedTheme: Theme = .glass
+    var selectedTheme: Theme = .modern
     var isKeyboardNavigationEnabled = true
     var widgetLayout: WidgetLayout = .grid(columns: 3)
     var isRefreshing = false
@@ -31,14 +31,14 @@ class AppState {
     
     func toggleTheme() {
         switch selectedTheme {
-        case .glass:
+        case .modern:
             selectedTheme = .dark
         case .dark:
             selectedTheme = .light
         case .light:
-            selectedTheme = .glass
+            selectedTheme = .modern
         case .system:
-            selectedTheme = .glass
+            selectedTheme = .modern
         }
     }
 }

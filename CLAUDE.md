@@ -130,7 +130,7 @@ xcodebuild -scheme Pylon -configuration Debug build  # Command line build
 - **Widget Engine**: Protocol-based modular system with lifecycle management
 - **Integration Layer**: EventKit (calendar/reminders), AppleScript (Notes/Mail), WeatherKit
 - **System Monitoring**: CPU/RAM/disk monitoring with efficient background refresh
-- **Theme System**: Glass-style visuals with dark/light mode and customizable themes
+- **Theme System**: Modern material-based visuals with dark/light mode and customizable themes
 - **Layout Engine**: Responsive grid with drag-and-drop and widget resizing
 
 **Performance Targets:**
