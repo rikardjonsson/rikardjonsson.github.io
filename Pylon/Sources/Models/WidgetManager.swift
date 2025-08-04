@@ -1,5 +1,13 @@
-import SwiftUI
+//
+//  WidgetManager.swift
+//  Pylon
+//
+//  Created on 04.08.25.
+//  Copyright © 2025. All rights reserved.
+//
+
 import Foundation
+import SwiftUI
 
 /// Manages widget containers with support for dynamic sizing, theming, and layout
 @MainActor
@@ -7,54 +15,54 @@ class WidgetManager: ObservableObject {
     @Published private(set) var containers: [any WidgetContainer] = []
     @Published private(set) var refreshInProgress: Set<UUID> = []
     @Published var gridConfiguration = GridConfiguration()
-    
+
     // MARK: - Container Management
-    
+
     func registerContainer(_ container: any WidgetContainer) {
         containers.append(container)
     }
-    
+
     func removeContainer(id: UUID) {
         containers.removeAll { $0.id == id }
     }
-    
+
     func updateContainerSize(id: UUID, newSize: WidgetSize) {
         guard let index = containers.firstIndex(where: { $0.id == id }) else { return }
         var container = containers[index]
-        
+
         // Check if the new size is supported
         guard container.supportedSizes.contains(newSize) else { return }
-        
+
         container.size = newSize
         containers[index] = container
-        
+
         // Recalculate layout positions if needed
         recalculateLayout()
     }
-    
+
     func updateContainerTheme(id: UUID, themeOverride: WidgetThemeOverride?) {
         guard let index = containers.firstIndex(where: { $0.id == id }) else { return }
         var container = containers[index]
         container.theme = themeOverride
         containers[index] = container
     }
-    
+
     func toggleContainerEnabled(id: UUID) {
         guard let index = containers.firstIndex(where: { $0.id == id }) else { return }
         var container = containers[index]
         container.isEnabled.toggle()
         containers[index] = container
     }
-    
+
     // MARK: - Refresh Management
-    
+
     func refreshContainer(id: UUID) async {
         guard let container = containers.first(where: { $0.id == id }),
               !refreshInProgress.contains(id) else { return }
-        
+
         refreshInProgress.insert(id)
         defer { refreshInProgress.remove(id) }
-        
+
         do {
             try await container.refresh()
         } catch {
@@ -62,12 +70,12 @@ class WidgetManager: ObservableObject {
             // TODO: Handle widget refresh errors appropriately
         }
     }
-    
+
     func refreshAllContainers() async {
         let enabledContainerIds = containers.compactMap { container in
             container.isEnabled ? container.id : nil
         }
-        
+
         await withTaskGroup(of: Void.self) { group in
             for containerId in enabledContainerIds {
                 group.addTask {
@@ -76,37 +84,37 @@ class WidgetManager: ObservableObject {
             }
         }
     }
-    
+
     func isRefreshing(_ containerId: UUID) -> Bool {
         refreshInProgress.contains(containerId)
     }
-    
+
     // MARK: - Layout Management
-    
+
     func recalculateLayout() {
         // TODO: Implement intelligent layout recalculation
         // This should handle container positioning to avoid overlaps
         // and optimize for the current grid configuration
     }
-    
+
     func moveContainer(from sourcePosition: GridPosition, to destinationPosition: GridPosition) {
         // TODO: Implement drag-and-drop reordering
         guard let index = containers.firstIndex(where: { $0.position == sourcePosition }) else { return }
         var container = containers[index]
         container.position = destinationPosition
         containers[index] = container
-        
+
         recalculateLayout()
     }
-    
+
     // MARK: - Filtering and Organization
-    
+
     func containers(in category: WidgetCategory) -> [any WidgetContainer] {
-        return containers.filter { $0.category == category }
+        containers.filter { $0.category == category }
     }
-    
+
     func enabledContainers() -> [any WidgetContainer] {
-        return containers.filter { $0.isEnabled }
+        containers.filter(\.isEnabled)
     }
 }
 
@@ -116,44 +124,46 @@ struct GridConfiguration: Sendable {
     var columns: Int = 4
     var gridUnit: CGFloat = 120
     var spacing: CGFloat = 16
-    var padding: EdgeInsets = EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20)
-    
+    var padding: EdgeInsets = .init(top: 20, leading: 20, bottom: 20, trailing: 20)
+
     var totalWidth: CGFloat {
         CGFloat(columns) * gridUnit + CGFloat(columns - 1) * spacing + padding.leading + padding.trailing
     }
 }
 
 // MARK: - Widget Protocol
+
 protocol Widget: Identifiable, Sendable {
     var id: UUID { get }
     var title: String { get }
     var isRefreshing: Bool { get }
     var lastUpdated: Date? { get }
-    
+
     @MainActor
     func refresh() async throws
-    
+
     @MainActor
     func body() -> AnyView
 }
 
 // MARK: - Widget Errors
+
 enum WidgetError: Error, LocalizedError {
     case permissionDenied
     case networkUnavailable
     case dataCorrupted
     case unknownError(Error)
-    
+
     var errorDescription: String? {
         switch self {
         case .permissionDenied:
-            return "Permission denied. Please grant access in System Preferences."
+            "Permission denied. Please grant access in System Preferences."
         case .networkUnavailable:
-            return "Network unavailable. Please check your connection."
+            "Network unavailable. Please check your connection."
         case .dataCorrupted:
-            return "Data corrupted. Please try refreshing."
-        case .unknownError(let error):
-            return "Unknown error: \(error.localizedDescription)"
+            "Data corrupted. Please try refreshing."
+        case let .unknownError(error):
+            "Unknown error: \(error.localizedDescription)"
         }
     }
 }

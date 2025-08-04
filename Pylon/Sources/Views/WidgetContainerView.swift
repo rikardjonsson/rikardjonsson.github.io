@@ -1,3 +1,11 @@
+//
+//  WidgetContainerView.swift
+//  Pylon
+//
+//  Created on 04.08.25.
+//  Copyright © 2025. All rights reserved.
+//
+
 import SwiftUI
 
 /// Universal container view that wraps all widgets with consistent styling
@@ -7,20 +15,20 @@ struct WidgetContainerView: View {
     let theme: any Theme
     let gridUnit: CGFloat
     let spacing: CGFloat
-    
+
     @State private var isHovered = false
     @State private var showingConfiguration = false
-    
+
     var body: some View {
         let frameSize = container.size.frameSize(gridUnit: gridUnit, spacing: spacing)
-        
+
         VStack(spacing: 0) {
             // Widget header (only visible on hover or when small)
             if isHovered || container.size == .small {
                 headerView
                     .transition(.move(edge: .top))
             }
-            
+
             // Main widget content
             contentView
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -42,23 +50,23 @@ struct WidgetContainerView: View {
             WidgetConfigurationView(container: container)
         }
     }
-    
+
     // MARK: - Header View
-    
+
     private var headerView: some View {
         HStack(spacing: 8) {
             Image(systemName: container.category.iconName)
                 .font(.caption)
                 .foregroundColor(effectiveAccentColor)
-            
+
             Text(container.title)
                 .font(.caption)
                 .fontWeight(.medium)
                 .foregroundColor(theme.textPrimary)
                 .lineLimit(1)
-            
+
             Spacer()
-            
+
             // Configuration button
             Button(action: {
                 showingConfiguration = true
@@ -74,9 +82,9 @@ struct WidgetContainerView: View {
         .padding(.vertical, 6)
         .background(theme.glassEffect.opacity(0.3))
     }
-    
+
     // MARK: - Content View
-    
+
     private var contentView: some View {
         Group {
             if container.isLoading {
@@ -89,30 +97,30 @@ struct WidgetContainerView: View {
         }
         .padding(contentPadding)
     }
-    
+
     private var loadingView: some View {
         VStack(spacing: 8) {
             ProgressView()
                 .scaleEffect(0.8)
-            
+
             Text("Loading...")
                 .font(.caption)
                 .foregroundColor(theme.textSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
+
     private func errorView(_ error: Error) -> some View {
         VStack(spacing: 8) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.title2)
                 .foregroundColor(.orange)
-            
+
             Text("Error")
                 .font(.caption)
                 .fontWeight(.medium)
                 .foregroundColor(theme.textPrimary)
-            
+
             Text(error.localizedDescription)
                 .font(.caption2)
                 .foregroundColor(theme.textSecondary)
@@ -121,29 +129,29 @@ struct WidgetContainerView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
+
     // MARK: - Background & Border
-    
+
     private var backgroundView: some View {
         RoundedRectangle(cornerRadius: effectiveCornerRadius)
             .fill(theme.glassEffect.opacity(effectiveBackgroundOpacity))
     }
-    
+
     private var borderView: some View {
         RoundedRectangle(cornerRadius: effectiveCornerRadius)
             .stroke(effectiveAccentColor.opacity(0.3), lineWidth: 1)
     }
-    
+
     // MARK: - Context Menu
-    
+
     private var contextMenuContent: some View {
         Group {
             Button("Configure") {
                 showingConfiguration = true
             }
-            
+
             Divider()
-            
+
             Menu("Resize") {
                 ForEach(container.supportedSizes, id: \.self) { size in
                     Button(size.displayName) {
@@ -152,32 +160,32 @@ struct WidgetContainerView: View {
                     .disabled(container.size == size)
                 }
             }
-            
+
             Divider()
-            
+
             Button(container.isEnabled ? "Disable" : "Enable") {
                 // TODO: Toggle container enabled state
             }
-            
+
             Button("Remove") {
                 // TODO: Remove widget
             }
         }
     }
-    
+
     // MARK: - Computed Properties
-    
+
     private var contentPadding: EdgeInsets {
         switch container.size {
         case .small:
-            return EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
+            EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
         case .medium:
-            return EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12)
+            EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12)
         case .large, .xlarge:
-            return EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
+            EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
         }
     }
-    
+
     private var effectiveAccentColor: Color {
         if let colorString = container.theme?.accentColor {
             // TODO: Parse color string to Color
@@ -185,11 +193,11 @@ struct WidgetContainerView: View {
         }
         return theme.accentColor
     }
-    
+
     private var effectiveBackgroundOpacity: Double {
         container.theme?.backgroundOpacity ?? 1.0
     }
-    
+
     private var effectiveCornerRadius: Double {
         container.theme?.cornerRadius ?? 12.0
     }
@@ -200,7 +208,7 @@ struct WidgetContainerView: View {
 struct WidgetConfigurationView: View {
     let container: any WidgetContainer
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationView {
             VStack {

@@ -1,9 +1,17 @@
+//
+//  PylonApp.swift
+//  Pylon
+//
+//  Created on 04.08.25.
+//  Copyright © 2025. All rights reserved.
+//
+
 import SwiftUI
 
 @main
 struct PylonApp: App {
     @StateObject private var appState = AppState()
-    
+
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -30,7 +38,7 @@ struct PylonApp: App {
                     // TODO: Show quick add
                 }
                 .keyboardShortcut("n")
-                
+
                 Button("Refresh All") {
                     Task {
                         await appState.refreshAllWidgets()

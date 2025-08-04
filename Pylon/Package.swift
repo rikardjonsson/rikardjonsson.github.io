@@ -4,13 +4,13 @@ import PackageDescription
 let package = Package(
     name: "Pylon",
     platforms: [
-        .macOS(.v15)
+        .macOS(.v15),
     ],
     products: [
         .executable(
             name: "Pylon",
             targets: ["Pylon"]
-        )
+        ),
     ],
     targets: [
         .executableTarget(
@@ -20,13 +20,13 @@ let package = Package(
             exclude: ["Assets.xcassets", "Pylon.entitlements", "Preview Content"],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
-                .enableExperimentalFeature("StrictConcurrency")
+                .enableExperimentalFeature("StrictConcurrency"),
             ]
         ),
         .testTarget(
             name: "PylonTests",
             dependencies: ["Pylon"],
             path: "Tests/PylonTests"
-        )
+        ),
     ]
 )

@@ -1,3 +1,11 @@
+//
+//  WidgetContainer.swift
+//  Pylon
+//
+//  Created on 04.08.25.
+//  Copyright © 2025. All rights reserved.
+//
+
 import SwiftUI
 
 /// Protocol defining the container architecture for all Pylon widgets
@@ -9,7 +17,7 @@ protocol WidgetContainer: Identifiable {
     var theme: WidgetThemeOverride? { get set }
     var isEnabled: Bool { get set }
     var position: GridPosition { get set }
-    
+
     /// Widget metadata
     var title: String { get }
     var category: WidgetCategory { get }
@@ -17,11 +25,11 @@ protocol WidgetContainer: Identifiable {
     var lastUpdated: Date? { get }
     var isLoading: Bool { get }
     var error: Error? { get }
-    
+
     /// Lifecycle methods
     func refresh() async throws
     func configure() -> AnyView
-    
+
     /// Main widget view
     func body(theme: any Theme, gridUnit: CGFloat, spacing: CGFloat) -> AnyView
 }
@@ -32,35 +40,35 @@ protocol WidgetContent: ObservableObject {
     var lastUpdated: Date? { get }
     var isLoading: Bool { get }
     var error: Error? { get }
-    
+
     func refresh() async throws
 }
 
 /// Widget categories for organization
 enum WidgetCategory: String, CaseIterable, Sendable {
-    case productivity = "productivity"
-    case information = "information"
-    case system = "system"
-    case communication = "communication"
-    case entertainment = "entertainment"
-    
+    case productivity
+    case information
+    case system
+    case communication
+    case entertainment
+
     var displayName: String {
         switch self {
-        case .productivity: return "Productivity"
-        case .information: return "Information"
-        case .system: return "System"
-        case .communication: return "Communication"
-        case .entertainment: return "Entertainment"
+        case .productivity: "Productivity"
+        case .information: "Information"
+        case .system: "System"
+        case .communication: "Communication"
+        case .entertainment: "Entertainment"
         }
     }
-    
+
     var iconName: String {
         switch self {
-        case .productivity: return "checklist"
-        case .information: return "info.circle"
-        case .system: return "cpu"
-        case .communication: return "message"
-        case .entertainment: return "play.circle"
+        case .productivity: "checklist"
+        case .information: "info.circle"
+        case .system: "cpu"
+        case .communication: "message"
+        case .entertainment: "play.circle"
         }
     }
 }
@@ -69,7 +77,7 @@ enum WidgetCategory: String, CaseIterable, Sendable {
 struct GridPosition: Sendable, Codable, Equatable {
     let x: Int
     let y: Int
-    
+
     static let zero = GridPosition(x: 0, y: 0)
 }
 
@@ -78,10 +86,12 @@ struct WidgetThemeOverride: Sendable, Codable {
     let accentColor: String?
     let backgroundOpacity: Double?
     let cornerRadius: Double?
-    
-    init(accentColor: String? = nil, 
-         backgroundOpacity: Double? = nil, 
-         cornerRadius: Double? = nil) {
+
+    init(
+        accentColor: String? = nil,
+        backgroundOpacity: Double? = nil,
+        cornerRadius: Double? = nil
+    ) {
         self.accentColor = accentColor
         self.backgroundOpacity = backgroundOpacity
         self.cornerRadius = cornerRadius

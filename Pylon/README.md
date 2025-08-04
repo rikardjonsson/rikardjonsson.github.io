@@ -32,7 +32,7 @@ Pylon aggregates information from across your Mac's ecosystem—calendar events,
 
 🧩 **Modern UI/UX**
 - Grid layout with resizable widgets
-- Glass-style visual effects
+- Modern material-based visual effects
 - Focus Mode integration
 - Light/Dark mode support
 - Customizable themes

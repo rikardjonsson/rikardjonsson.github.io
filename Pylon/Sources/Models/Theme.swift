@@ -1,3 +1,11 @@
+//
+//  Theme.swift
+//  Pylon
+//
+//  Created on 04.08.25.
+//  Copyright © 2025. All rights reserved.
+//
+
 import SwiftUI
 
 protocol Theme: Sendable {
@@ -13,23 +21,25 @@ protocol Theme: Sendable {
 }
 
 // MARK: - Theme Concrete Types
+
 enum ThemeType: CaseIterable, Sendable {
     case modern
-    case dark  
+    case dark
     case light
     case system
-    
+
     var theme: any Theme {
         switch self {
-        case .modern: return ModernTheme()
-        case .dark: return DarkTheme()
-        case .light: return LightTheme()
-        case .system: return SystemTheme()
+        case .modern: ModernTheme()
+        case .dark: DarkTheme()
+        case .light: LightTheme()
+        case .system: SystemTheme()
         }
     }
 }
 
 // MARK: - Modern Theme
+
 struct ModernTheme: Theme {
     let name = "Modern"
     let backgroundMaterial = Material.regularMaterial
@@ -43,6 +53,7 @@ struct ModernTheme: Theme {
 }
 
 // MARK: - Dark Theme
+
 struct DarkTheme: Theme {
     let name = "Dark"
     let backgroundMaterial = Material.regularMaterial
@@ -56,6 +67,7 @@ struct DarkTheme: Theme {
 }
 
 // MARK: - Light Theme
+
 struct LightTheme: Theme {
     let name = "Light"
     let backgroundMaterial = Material.regularMaterial
@@ -69,6 +81,7 @@ struct LightTheme: Theme {
 }
 
 // MARK: - System Theme
+
 struct SystemTheme: Theme {
     let name = "System"
     let backgroundMaterial = Material.regularMaterial
@@ -82,6 +95,7 @@ struct SystemTheme: Theme {
 }
 
 // MARK: - Theme Environment
+
 struct ThemeKey: EnvironmentKey {
     static let defaultValue: any Theme = ModernTheme()
 }

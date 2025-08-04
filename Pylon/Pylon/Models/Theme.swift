@@ -1,3 +1,11 @@
+//
+//  Theme.swift
+//  Pylon
+//
+//  Created on 04.08.25.
+//  Copyright © 2025. All rights reserved.
+//
+
 import SwiftUI
 
 protocol Theme {
@@ -20,6 +28,7 @@ extension Theme {
 }
 
 // MARK: - Modern Theme
+
 struct ModernTheme: Theme {
     let name = "Modern"
     let backgroundStyle = BackgroundStyle.regularMaterial
@@ -33,6 +42,7 @@ struct ModernTheme: Theme {
 }
 
 // MARK: - Dark Theme
+
 struct DarkTheme: Theme {
     let name = "Dark"
     let backgroundStyle = BackgroundStyle.regularMaterial
@@ -46,6 +56,7 @@ struct DarkTheme: Theme {
 }
 
 // MARK: - Light Theme
+
 struct LightTheme: Theme {
     let name = "Light"
     let backgroundStyle = BackgroundStyle.regularMaterial
@@ -59,6 +70,7 @@ struct LightTheme: Theme {
 }
 
 // MARK: - System Theme
+
 struct SystemTheme: Theme {
     let name = "System"
     let backgroundStyle = BackgroundStyle.regularMaterial
@@ -72,6 +84,7 @@ struct SystemTheme: Theme {
 }
 
 // MARK: - Theme Environment
+
 struct ThemeKey: EnvironmentKey {
     static let defaultValue: Theme = .modern
 }
