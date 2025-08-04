@@ -357,6 +357,193 @@ Pylon/Sources/
 - [ ] Protocol-based interfaces used
 - [ ] macOS 15 APIs leveraged appropriately
 
+## Systematic Development Optimization Practices
+
+### 🔍 Codebase Review Goals
+
+When conducting code reviews and audits, identify and document detailed issues and improvement opportunities, each including:
+
+**Required Documentation Format:**
+- **Title**: Clear, concise, and actionable
+- **Description**: What's wrong, why it matters, and how to fix it  
+- **Priority**: High (must fix), Medium (should fix), Low (nice to fix)
+- **Tags**: Use relevant labels (e.g. concurrency, architecture, style, cleanup)
+- **References**: File paths and line numbers where applicable
+
+**Focus Areas for Identification:**
+- Unsafe or outdated Swift patterns
+- Incorrect or inefficient use of concurrency (async/await, @MainActor, actors)
+- Poor protocol design, overexposed types, or tight coupling
+- Violations of Swift API Design Guidelines
+- Inconsistent naming, file structure, or style
+- Areas lacking modularity, testability, or dependency isolation
+- Performance bottlenecks and resource inefficiencies
+- Security vulnerabilities and data handling issues
+
+### 📌 GitHub Issues Review and Management
+
+**Regular Issue Maintenance:**
+- Review all open issues in the repository systematically
+- Update titles, descriptions, and priorities for clarity and consistency
+- Merge duplicates or related topics into consolidated issues
+- Close issues that are resolved, outdated, or no longer relevant
+- Flag incomplete issues needing further clarification
+- Ensure all issues have proper labels, milestones, and assignees
+- Create issue templates for consistent reporting
+
+**Issue Quality Standards:**
+- Clear, actionable titles following conventional formats
+- Detailed descriptions with acceptance criteria
+- Proper categorization (bug, feature, enhancement, docs, etc.)
+- Priority levels based on impact and urgency
+- References to related issues, PRs, or documentation
+- Step-by-step reproduction instructions for bugs
+
+### 🧹 Repository Cleanup Tasks
+
+**File System Auditing:**
+- Audit the root folder for unnecessary, misnamed, or temporary files
+- Remove clutter (.DS_Store, .xcuserstate, .env.example.old, unused files)
+- Identify and archive obsolete documentation or code samples
+- Ensure consistent file naming conventions across the repository
+- Validate directory structure follows project conventions
+
+**Proposed Clean Swift Repository Structure:**
+```
+ProjectName/
+├── Sources/              # Main source code (SPM target)
+│   ├── Models/          # Data models and business logic
+│   ├── Views/           # UI components and screens
+│   ├── Services/        # Background services and APIs
+│   ├── Extensions/      # Swift extensions and utilities
+│   └── Resources/       # Assets, localizations, configs
+├── Tests/               # Test suite
+│   ├── UnitTests/      # Unit tests for models/services
+│   ├── UITests/        # UI automation tests
+│   └── TestResources/  # Test fixtures and mocks
+├── docs/                # Project documentation
+├── scripts/             # Build and development scripts
+├── .github/             # GitHub workflows and templates
+├── Package.swift        # SPM configuration
+├── .gitignore          # Git ignore rules
+├── .swiftlint.yml      # Linting configuration
+├── .swiftformat        # Formatting configuration
+├── Makefile            # Development commands
+└── README.md           # Project overview
+```
+
+### 📈 Prioritization Framework
+
+**Base Recommendations On:**
+- Code clarity, scalability, and maintainability impact
+- Swift 6.0+ best practices and concurrency model compliance
+- Developer productivity and onboarding experience improvement
+- Avoidance of future technical debt accumulation
+- Performance and resource usage optimization
+- Security and privacy compliance requirements
+- Accessibility and user experience considerations
+
+**Priority Matrix:**
+- **Critical**: Security vulnerabilities, build failures, data corruption risks
+- **High**: Performance issues, concurrency violations, architectural debt
+- **Medium**: Code style inconsistencies, documentation gaps, test coverage
+- **Low**: Cosmetic improvements, optional optimizations, nice-to-have features
+
+### 🧰 General Development Recommendations
+
+**SwiftLint/SwiftFormat Rule Suggestions:**
+- Enable strict concurrency rules for Swift 6.0 compliance
+- Enforce consistent code style and naming conventions
+- Set appropriate line length and file size limits
+- Configure custom rules for project-specific patterns
+- Enable accessibility and performance-related rules
+
+**Modularization Opportunities:**
+- Convert logical components into Swift Packages for reusability
+- Separate core business logic from UI presentation layers
+- Create shared libraries for common functionality
+- Implement plugin architectures for extensible components
+- Design framework boundaries with clear API contracts
+
+**Testing Strategy Improvements:**
+- Identify coverage gaps and create comprehensive test plans
+- Optimize slow tests and eliminate test smells
+- Implement proper mocking and dependency injection
+- Add performance and stress testing for critical paths
+- Create integration tests for external service dependencies
+
+**Dependency Management:**
+- Audit for unused packages and remove unnecessary dependencies
+- Ensure proper version pinning and lock file management
+- Evaluate dependency security and maintenance status
+- Consider alternatives for heavy or poorly maintained packages
+- Document dependency rationale and upgrade strategies
+
+**Documentation Gaps:**
+- Comprehensive README with clear setup instructions
+- Public API documentation with code examples
+- Onboarding guides for new contributors
+- Architecture decision records (ADRs)
+- Troubleshooting guides and FAQs
+- Code style guides and contribution guidelines
+
+### 📚 Reference Standards
+
+**Swift API Design Guidelines:**
+- Follow Apple's naming conventions and design patterns
+- Use clear, descriptive names that convey intent
+- Prefer value types over reference types where appropriate
+- Design for clarity at the point of use
+- Maintain API compatibility and evolution strategies
+
+**Swift 6.0+ Concurrency Model:**
+- Use @MainActor for UI components and main thread operations
+- Implement proper actor boundaries for data isolation
+- Ensure Sendable compliance for shared data types
+- Leverage structured concurrency with async/await patterns
+- Handle concurrency errors and cancellation gracefully
+
+**Modern Architectural Patterns:**
+- MVVM with SwiftUI and Combine/Observation framework
+- Protocol-oriented programming for flexibility and testability
+- Dependency injection for loose coupling and testing
+- Repository pattern for data access abstraction
+- Command pattern for undoable operations
+
+**Clean Code Principles:**
+- **SOLID**: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion
+- **DRY**: Don't Repeat Yourself - extract common functionality
+- **KISS**: Keep It Simple, Stupid - prefer simple solutions
+- **YAGNI**: You Aren't Gonna Need It - avoid premature optimization
+- **Composition over Inheritance**: Favor composition and protocols
+
+**Apple Development Idioms:**
+- Study Apple sample projects and development frameworks
+- Follow Human Interface Guidelines for macOS applications
+- Implement proper accessibility support with VoiceOver
+- Use system-provided components and design patterns
+- Respect user privacy and system resource constraints
+
+### 🎯 Implementation Workflow
+
+**Pre-Development Phase:**
+1. Conduct comprehensive codebase review using above criteria
+2. Create prioritized backlog of improvement tasks
+3. Establish coding standards and quality gates
+4. Set up development tooling and automation
+
+**Development Phase:**
+1. Follow systematic review practices for all changes
+2. Apply quality checkpoints at each stage
+3. Maintain documentation and issue tracking
+4. Ensure all changes meet established standards
+
+**Post-Development Phase:**
+1. Conduct final review against all criteria
+2. Update documentation and close related issues
+3. Prepare prioritized recommendations for next iteration
+4. Gather metrics and feedback for process improvement
+
 ## Testing Approaches
 
 ### SuperClaude
