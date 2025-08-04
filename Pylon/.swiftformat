@@ -1,0 +1,35 @@
+# SwiftFormat Configuration for Pylon
+# Swift 6.0 macOS productivity dashboard
+
+# Swift version
+--swiftversion 6.0
+
+# Indentation
+--indent 4
+--tabwidth 4
+
+# Line length
+--maxwidth 120
+
+# Wrapping
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+
+# Spacing and formatting
+--trimwhitespace always
+--allman false
+--commas always
+--semicolons never
+
+# Self references
+--self remove
+
+# Import organization
+--importgrouping testable-bottom
+
+# File exclusions
+--exclude .build,DerivedData,docs,scripts,.github
+
+# Header template for new files
+--header "//\n//  {file}\n//  Pylon\n//\n//  Created on {created}.\n//  Copyright © {year}. All rights reserved.\n//"
