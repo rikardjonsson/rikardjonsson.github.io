@@ -77,7 +77,7 @@ enum WidgetLayout: Equatable, CaseIterable, Sendable {
             .grid(columns: 3),
             .grid(columns: 4),
             .list,
-            .masonry
+            .masonry,
         ]
     }
 }
