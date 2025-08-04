@@ -50,10 +50,6 @@ struct HeaderView: View {
                     .fontWeight(.bold)
                     .foregroundColor(theme.textPrimary)
 
-                Text("Your productivity dashboard")
-                    .font(.subheadline)
-                    .foregroundColor(theme.textSecondary)
-
                 Text("life is a circle because no one learns anything")
                     .font(.caption)
                     .foregroundColor(theme.textSecondary.opacity(0.8))
@@ -113,27 +109,35 @@ struct MainContentView: View {
                 .multilineTextAlignment(.center)
 
             VStack(spacing: 12) {
-                HStack(spacing: 12) {
-                    Button("Sample Widget") {
-                        addSampleWidget()
-                    }
-                    .buttonStyle(.bordered)
-                    
-                    Button("Clock") {
-                        addClockWidget()
-                    }
-                    .buttonStyle(.bordered)
-                    
-                    Button("Weather") {
-                        addWeatherWidget()
-                    }
-                    .buttonStyle(.bordered)
+                // Row 1: Core widgets
+                HStack(spacing: 8) {
+                    Button("Clock") { addClockWidget() }.buttonStyle(.bordered)
+                    Button("Weather") { addWeatherWidget() }.buttonStyle(.bordered)
+                    Button("Calendar") { addCalendarWidget() }.buttonStyle(.bordered)
+                    Button("Reminders") { addRemindersWidget() }.buttonStyle(.bordered)
                 }
                 
-                Button("System Monitor") {
-                    addSystemMonitorWidget()
+                // Row 2: Information widgets
+                HStack(spacing: 8) {
+                    Button("Notes") { addNotesWidget() }.buttonStyle(.bordered)
+                    Button("Stocks") { addStocksWidget() }.buttonStyle(.bordered)
+                    Button("Crypto") { addCryptoWidget() }.buttonStyle(.bordered)
+                    Button("News") { addNewsWidget() }.buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
+                
+                // Row 3: Entertainment & System
+                HStack(spacing: 8) {
+                    Button("Music") { addMusicWidget() }.buttonStyle(.bordered)
+                    Button("Photos") { addPhotosWidget() }.buttonStyle(.bordered)
+                    Button("Activity") { addActivityWidget() }.buttonStyle(.bordered)
+                    Button("Network") { addNetworkWidget() }.buttonStyle(.bordered)
+                }
+                
+                // Row 4: System widgets
+                HStack(spacing: 8) {
+                    Button("System Monitor") { addSystemMonitorWidget() }.buttonStyle(.bordered)
+                    Button("Sample") { addSampleWidget() }.buttonStyle(.bordered)
+                }
             }
 
             // Show sample widgets in different sizes for demonstration
@@ -201,6 +205,56 @@ struct MainContentView: View {
         let systemWidget = SystemMonitorWidget()
         appState.widgetManager.registerContainer(systemWidget)
     }
+    
+    private func addCalendarWidget() {
+        let calendarWidget = CalendarWidget()
+        appState.widgetManager.registerContainer(calendarWidget)
+    }
+    
+    private func addRemindersWidget() {
+        let remindersWidget = RemindersWidget()
+        appState.widgetManager.registerContainer(remindersWidget)
+    }
+    
+    private func addNotesWidget() {
+        let notesWidget = NotesWidget()
+        appState.widgetManager.registerContainer(notesWidget)
+    }
+    
+    private func addStocksWidget() {
+        let stocksWidget = StocksWidget()
+        appState.widgetManager.registerContainer(stocksWidget)
+    }
+    
+    private func addCryptoWidget() {
+        let cryptoWidget = CryptoWidget()
+        appState.widgetManager.registerContainer(cryptoWidget)
+    }
+    
+    private func addNewsWidget() {
+        let newsWidget = NewsWidget()
+        appState.widgetManager.registerContainer(newsWidget)
+    }
+    
+    private func addMusicWidget() {
+        let musicWidget = MusicWidget()
+        appState.widgetManager.registerContainer(musicWidget)
+    }
+    
+    private func addPhotosWidget() {
+        let photosWidget = PhotosWidget()
+        appState.widgetManager.registerContainer(photosWidget)
+    }
+    
+    private func addActivityWidget() {
+        let activityWidget = ActivityWidget()
+        appState.widgetManager.registerContainer(activityWidget)
+    }
+    
+    private func addNetworkWidget() {
+        let networkWidget = NetworkWidget()
+        appState.widgetManager.registerContainer(networkWidget)
+    }
 
     private func createSampleWidget(size: WidgetSize) -> SampleWidget {
         let widget = SampleWidget()
@@ -248,12 +302,6 @@ struct FooterView: View {
     var body: some View {
         HStack {
             Spacer()
-
-            Button("Toggle Theme") {
-                appState.toggleTheme()
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
         }
         .padding(.horizontal)
     }
