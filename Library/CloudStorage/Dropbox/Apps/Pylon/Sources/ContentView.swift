@@ -125,17 +125,27 @@ struct MainContentView: View {
                     Button("News") { addNewsWidget() }.buttonStyle(.bordered)
                 }
                 
-                // Row 3: Entertainment & System
+                // Row 3: Communication & Finance
+                HStack(spacing: 8) {
+                    Button("Email") { addEmailWidget() }.buttonStyle(.bordered)
+                    Button("Finance") { addFinanceWidget() }.buttonStyle(.bordered)
+                    Button("Social") { addSocialWidget() }.buttonStyle(.bordered)
+                    Button("Fitness") { addFitnessWidget() }.buttonStyle(.bordered)
+                }
+                
+                // Row 4: Entertainment & Travel
                 HStack(spacing: 8) {
                     Button("Music") { addMusicWidget() }.buttonStyle(.bordered)
                     Button("Photos") { addPhotosWidget() }.buttonStyle(.bordered)
-                    Button("Activity") { addActivityWidget() }.buttonStyle(.bordered)
-                    Button("Network") { addNetworkWidget() }.buttonStyle(.bordered)
+                    Button("Podcast") { addPodcastWidget() }.buttonStyle(.bordered)
+                    Button("Travel") { addTravelWidget() }.buttonStyle(.bordered)
                 }
                 
-                // Row 4: System widgets
+                // Row 5: Activity & System
                 HStack(spacing: 8) {
-                    Button("System Monitor") { addSystemMonitorWidget() }.buttonStyle(.bordered)
+                    Button("Activity") { addActivityWidget() }.buttonStyle(.bordered)
+                    Button("Network") { addNetworkWidget() }.buttonStyle(.bordered)
+                    Button("System") { addSystemMonitorWidget() }.buttonStyle(.bordered)
                     Button("Sample") { addSampleWidget() }.buttonStyle(.bordered)
                 }
             }
@@ -254,6 +264,36 @@ struct MainContentView: View {
     private func addNetworkWidget() {
         let networkWidget = NetworkWidget()
         appState.widgetManager.registerContainer(networkWidget)
+    }
+    
+    private func addEmailWidget() {
+        let emailWidget = EmailWidget()
+        appState.widgetManager.registerContainer(emailWidget)
+    }
+    
+    private func addFinanceWidget() {
+        let financeWidget = FinanceWidget()
+        appState.widgetManager.registerContainer(financeWidget)
+    }
+    
+    private func addSocialWidget() {
+        let socialWidget = SocialWidget()
+        appState.widgetManager.registerContainer(socialWidget)
+    }
+    
+    private func addFitnessWidget() {
+        let fitnessWidget = FitnessWidget()
+        appState.widgetManager.registerContainer(fitnessWidget)
+    }
+    
+    private func addPodcastWidget() {
+        let podcastWidget = PodcastWidget()
+        appState.widgetManager.registerContainer(podcastWidget)
+    }
+    
+    private func addTravelWidget() {
+        let travelWidget = TravelWidget()
+        appState.widgetManager.registerContainer(travelWidget)
     }
 
     private func createSampleWidget(size: WidgetSize) -> SampleWidget {
