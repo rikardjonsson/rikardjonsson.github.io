@@ -146,7 +146,7 @@ struct MainContentView: View {
                     Button("Activity") { addActivityWidget() }.buttonStyle(.bordered)
                     Button("Network") { addNetworkWidget() }.buttonStyle(.bordered)
                     Button("System") { addSystemMonitorWidget() }.buttonStyle(.bordered)
-                    Button("Sample") { addSampleWidget() }.buttonStyle(.bordered)
+                    Button("Shopping") { addShoppingWidget() }.buttonStyle(.bordered)
                 }
             }
 
@@ -294,6 +294,11 @@ struct MainContentView: View {
     private func addTravelWidget() {
         let travelWidget = TravelWidget()
         appState.widgetManager.registerContainer(travelWidget)
+    }
+    
+    private func addShoppingWidget() {
+        let shoppingWidget = ShoppingWidget()
+        appState.widgetManager.registerContainer(shoppingWidget)
     }
 
     private func createSampleWidget(size: WidgetSize) -> SampleWidget {
