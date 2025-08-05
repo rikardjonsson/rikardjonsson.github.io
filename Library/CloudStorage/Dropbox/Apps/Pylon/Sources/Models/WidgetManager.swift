@@ -106,6 +106,26 @@ class WidgetManager: ObservableObject {
 
         recalculateLayout()
     }
+    
+    func moveContainer(fromIndex: Int, toIndex: Int) {
+        guard fromIndex != toIndex,
+              fromIndex >= 0, fromIndex < containers.count,
+              toIndex >= 0, toIndex < containers.count else { return }
+        
+        let container = containers.remove(at: fromIndex)
+        containers.insert(container, at: toIndex)
+        
+        // Update positions after reordering
+        updateContainerPositions()
+    }
+    
+    private func updateContainerPositions() {
+        for (index, _) in containers.enumerated() {
+            let row = index / gridConfiguration.columns
+            let column = index % gridConfiguration.columns
+            containers[index].position = GridPosition(row: row, column: column)
+        }
+    }
 
     // MARK: - Filtering and Organization
 

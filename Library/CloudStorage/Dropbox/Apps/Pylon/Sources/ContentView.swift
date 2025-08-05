@@ -157,20 +157,13 @@ struct MainContentView: View {
 
     private var widgetGridView: some View {
         let config = appState.widgetManager.gridConfiguration
-        let columns = Array(repeating: GridItem(.flexible(), spacing: config.spacing), count: config.columns)
-
-        return LazyVGrid(columns: columns, spacing: config.spacing) {
-            ForEach(appState.widgetManager.enabledContainers(), id: \.id) { container in
-                AnyView(
-                    WidgetContainerView(
-                        container: container,
-                        theme: theme,
-                        gridUnit: config.gridUnit,
-                        spacing: config.spacing
-                    )
-                )
-            }
-        }
+        let enabledContainers = appState.widgetManager.enabledContainers()
+        
+        return DraggableGridView(
+            gridConfig: config,
+            containers: enabledContainers
+        )
+        .frame(minHeight: 400) // Ensure minimum height for proper interaction
     }
 
     private var sampleWidgetShowcase: some View {

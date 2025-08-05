@@ -18,6 +18,7 @@ struct WidgetContainerView: View {
 
     @State private var isHovered = false
     @State private var showingConfiguration = false
+    @EnvironmentObject private var appState: AppState
 
     var body: some View {
         let frameSize = container.size.frameSize(gridUnit: gridUnit, spacing: spacing)
@@ -155,7 +156,7 @@ struct WidgetContainerView: View {
             Menu("Resize") {
                 ForEach(container.supportedSizes, id: \.self) { size in
                     Button(size.displayName) {
-                        // TODO: Update container size
+                        updateContainerSize(to: size)
                     }
                     .disabled(container.size == size)
                 }
@@ -164,11 +165,11 @@ struct WidgetContainerView: View {
             Divider()
 
             Button(container.isEnabled ? "Disable" : "Enable") {
-                // TODO: Toggle container enabled state
+                toggleContainerEnabled()
             }
 
             Button("Remove") {
-                // TODO: Remove widget
+                removeContainer()
             }
         }
     }
@@ -200,6 +201,20 @@ struct WidgetContainerView: View {
 
     private var effectiveCornerRadius: Double {
         container.theme?.cornerRadius ?? 12.0
+    }
+    
+    // MARK: - Actions
+    
+    private func updateContainerSize(to newSize: WidgetSize) {
+        appState.widgetManager.updateContainerSize(id: container.id, newSize: newSize)
+    }
+    
+    private func toggleContainerEnabled() {
+        appState.widgetManager.toggleContainerEnabled(id: container.id)
+    }
+    
+    private func removeContainer() {
+        appState.widgetManager.removeContainer(id: container.id)
     }
 }
 

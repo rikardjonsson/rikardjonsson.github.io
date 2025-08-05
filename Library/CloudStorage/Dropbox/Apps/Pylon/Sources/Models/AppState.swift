@@ -21,9 +21,12 @@ class AppState: ObservableObject {
     }
 
     var widgetManager = WidgetManager()
+    var layoutPersistence = LayoutPersistence()
 
     init() {
+        loadPersistedLayout()
         setupInitialWidgets()
+        setupAutoSave()
     }
 
     private func setupInitialWidgets() {
@@ -50,6 +53,31 @@ class AppState: ObservableObject {
         case .system:
             selectedThemeType = .modern
         }
+    }
+    
+    // MARK: - Layout Persistence
+    
+    private func loadPersistedLayout() {
+        let (layoutData, gridConfig) = layoutPersistence.loadLayout()
+        
+        // Apply grid configuration
+        widgetManager.gridConfiguration = gridConfig
+        
+        // Layout data will be used to restore widgets when they're registered
+        // Store it for later use in setupInitialWidgets
+    }
+    
+    private func setupAutoSave() {
+        layoutPersistence.setupAutoSave(widgetManager: widgetManager)
+    }
+    
+    func saveLayout() {
+        layoutPersistence.saveLayout(widgetManager.containers, gridConfig: widgetManager.gridConfiguration)
+    }
+    
+    func clearLayout() {
+        layoutPersistence.clearLayout()
+        widgetManager.containers.removeAll()
     }
 }
 
