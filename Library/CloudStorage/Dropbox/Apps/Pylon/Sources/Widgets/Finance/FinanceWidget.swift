@@ -17,7 +17,7 @@ final class FinanceWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .large
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: FinanceContent
     
@@ -25,7 +25,7 @@ final class FinanceWidget: WidgetContainer, ObservableObject {
     
     let title = "Finance"
     let category = WidgetCategory.information
-    let supportedSizes: [WidgetSize] = [.medium, .large, .xlarge]
+    let supportedSizes: [WidgetSize] = [.small, .medium, .large, .xlarge]
     
     // Proxy content properties
     var lastUpdated: Date? { content.lastUpdated }
@@ -206,74 +206,54 @@ final class FinanceWidget: WidgetContainer, ObservableObject {
     }
     
     private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 20) {
-            // Left side - Portfolio & Holdings
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Holdings")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(theme.textPrimary)
-                    
-                    Spacer()
-                    
-                    performanceIndicator(theme: theme)
-                }
-                
-                VStack(spacing: 8) {
-                    ForEach(content.holdings, id: \.id) { holding in
-                        self.holdingRowDetailed(holding, theme: theme)
+        VStack(spacing: 16) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                            .font(.largeTitle)
+                            .foregroundColor(theme.accentColor)
+                        Text("Investment Portfolio")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(theme.textPrimary)
                     }
-                }
-                
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-            
-            Divider()
-                .frame(height: 140)
-            
-            // Right side - Portfolio Summary
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Portfolio")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(theme.textPrimary)
-                
-                VStack(spacing: 12) {
-                    portfolioMetric("Total Value", value: String(format: "$%.0f", content.portfolio.totalValue), theme: theme)
-                    portfolioMetric("Today's P&L", value: String(format: "$%.2f", content.portfolio.dayChange), 
-                                  color: content.portfolio.dayChange >= 0 ? .green : .red, theme: theme)
-                    portfolioMetric("Performance", value: String(format: "%.2f%%", content.portfolio.dayChangePercent), 
-                                  color: content.portfolio.dayChangePercent >= 0 ? .green : .red, theme: theme)
-                    portfolioMetric("Cash Balance", value: String(format: "$%.0f", content.portfolio.cashBalance), theme: theme)
-                }
-                
-                Divider()
-                
-                VStack(spacing: 8) {
-                    Text("Asset Allocation")
+                    Text("Complete portfolio overview and analytics")
                         .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(theme.textPrimary)
-                    
-                    ForEach(content.assetAllocation, id: \.category) { allocation in
-                        self.allocationRow(allocation, theme: theme)
-                    }
-                }
-                
-                Spacer()
-                
-                if let lastUpdated = content.lastUpdated {
-                    Text("Updated: \(formatTime(lastUpdated))")
-                        .font(.caption)
                         .foregroundColor(theme.textSecondary)
                 }
+                Spacer()
             }
-            .frame(width: 200)
+            
+            // Portfolio summary cards
+            HStack(spacing: 16) {
+                financeCard("Total Value", value: String(format: "$%.2f", content.portfolio.totalValue), subtitle: "Portfolio", color: .blue, theme: theme)
+                financeCard("Day Change", value: String(format: "$%.2f", content.portfolio.dayChange), subtitle: String(format: "%.2f%%", content.portfolio.dayChangePercent), color: content.portfolio.dayChange >= 0 ? .green : .red, theme: theme)
+                financeCard("Holdings", value: "\(content.holdings.count)", subtitle: "Positions", color: .orange, theme: theme)
+            }
+            
+            // Holdings table
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Portfolio Holdings")
+                    .font(.headline)
+                    .foregroundColor(theme.textPrimary)
+                
+                ScrollView {
+                    VStack(spacing: 6) {
+                        ForEach(content.holdings, id: \.id) { holding in
+                            self.holdingRowDetailed(holding, theme: theme)
+                        }
+                    }
+                }
+                .scrollIndicators(.hidden)
+            }
+            
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+    
     
     // MARK: - Helper Views
     
@@ -394,6 +374,27 @@ final class FinanceWidget: WidgetContainer, ObservableObject {
     }
     
     // MARK: - Helper Methods
+    
+    private func financeCard(_ label: String, value: String, subtitle: String, color: Color, theme: any Theme) -> some View {
+        VStack(spacing: 6) {
+            Text(value)
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(color)
+            
+            Text(label)
+                .font(.caption)
+                .foregroundColor(theme.textPrimary)
+            
+            Text(subtitle)
+                .font(.caption2)
+                .foregroundColor(theme.textSecondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity)
+        .background(color.opacity(0.1))
+        .cornerRadius(8)
+    }
     
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()

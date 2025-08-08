@@ -58,17 +58,17 @@ final class GridSystemTests: XCTestCase {
     
     func testGridConfiguration() {
         let config = GridConfiguration.standard
-        XCTAssertEqual(config.cellSize, 80)
-        XCTAssertEqual(config.cellSpacing, 12)
+        XCTAssertEqual(config.cellSize, 120)
+        XCTAssertEqual(config.cellSpacing, 8)
         XCTAssertEqual(config.bounds.columns, 8)
         
         let frameSize = config.frameSize(for: .medium)
-        XCTAssertEqual(frameSize.width, 172) // (80 * 2) + (12 * 1)
-        XCTAssertEqual(frameSize.height, 172)
+        XCTAssertEqual(frameSize.width, 248) // (120 * 2) + (8 * 1)
+        XCTAssertEqual(frameSize.height, 248)
         
         let framePosition = config.framePosition(for: GridPosition(row: 1, column: 1))
-        XCTAssertEqual(framePosition.x, 92) // (80 + 12) * 1
-        XCTAssertEqual(framePosition.y, 92)
+        XCTAssertEqual(framePosition.x, 128) // (120 + 8) * 1
+        XCTAssertEqual(framePosition.y, 128)
     }
     
     // MARK: - Widget Protocol Tests
@@ -93,8 +93,8 @@ final class GridSystemTests: XCTestCase {
     
     // MARK: - Layout Engine Tests
     
-    func testTetrisLayoutEngine() {
-        let engine = TetrisLayoutEngine()
+    func testSimpleSequentialEngine() {
+        let engine = SimpleSequentialEngine()
         let config = GridConfiguration.standard
         
         // Test finding available position
@@ -112,10 +112,11 @@ final class GridSystemTests: XCTestCase {
         let detector = SimpleCollisionDetector()
         
         // Test non-overlapping positions
-        XCTAssertFalse(detector.hasCollision(
-            widget: testWidget,
+        XCTAssertFalse(detector.wouldCollide(
+            testWidget,
             at: GridPosition(row: 0, column: 0),
-            with: []
+            with: [],
+            excludingIds: []
         ))
         
         // Test overlapping positions
@@ -126,10 +127,11 @@ final class GridSystemTests: XCTestCase {
             GridPosition(row: 1, column: 1)
         ]
         
-        XCTAssertTrue(detector.hasCollision(
-            widget: testWidget,
+        XCTAssertTrue(detector.wouldCollide(
+            testWidget,
             at: GridPosition(row: 0, column: 0),
-            with: occupiedPositions
+            with: occupiedPositions,
+            excludingIds: []
         ))
     }
     
@@ -224,8 +226,9 @@ final class GridSystemTests: XCTestCase {
         
         measure {
             // Test finding available position in crowded grid
+            let engine = SimpleSequentialEngine()
             let newWidget = ExampleWidget(title: "New", size: .medium, category: .utilities)
-            _ = gridManager.layoutEngine.findAvailablePosition(
+            _ = engine.findAvailablePosition(
                 for: newWidget,
                 avoiding: gridManager.occupiedPositions,
                 configuration: gridManager.configuration

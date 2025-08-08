@@ -17,7 +17,7 @@ final class StocksWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .large
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: StocksContent
     
@@ -59,7 +59,7 @@ final class StocksWidget: WidgetContainer, ObservableObject {
                 case .large:
                     largeLayout(theme: theme)
                 case .xlarge:
-                    xlargeLayout(theme: theme)
+                    largeLayout(theme: theme) // Use large layout for xlarge
                 }
             }
         )
@@ -136,65 +136,6 @@ final class StocksWidget: WidgetContainer, ObservableObject {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
-    private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 20) {
-            // Left side - Main watchlist
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Watchlist")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(theme.textPrimary)
-                    
-                    Spacer()
-                    
-                    marketIndicator(theme: theme)
-                }
-                
-                VStack(spacing: 8) {
-                    ForEach(content.watchlist, id: \.id) { stock in
-                        self.stockRowDetailed(stock, theme: theme)
-                    }
-                }
-                
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-            
-            Divider()
-                .frame(height: 140)
-            
-            // Right side - Market summary
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Market Summary")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(theme.textPrimary)
-                
-                VStack(spacing: 8) {
-                    marketSummaryRow("S&P 500", value: content.marketIndices.sp500, theme: theme)
-                    marketSummaryRow("NASDAQ", value: content.marketIndices.nasdaq, theme: theme)
-                    marketSummaryRow("DOW", value: content.marketIndices.dow, theme: theme)
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("Market \(content.marketStatus)")
-                        .font(.caption)
-                        .foregroundColor(marketStatusColor(content.marketStatus))
-                    
-                    if let lastUpdated = content.lastUpdated {
-                        Text("Updated: \(formatTime(lastUpdated))")
-                            .font(.caption)
-                            .foregroundColor(theme.textSecondary)
-                    }
-                }
-            }
-            .frame(width: 160)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
     
     // MARK: - Helper Views
     

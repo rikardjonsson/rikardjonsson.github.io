@@ -17,7 +17,7 @@ final class SocialWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .large
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: SocialContent
     
@@ -59,7 +59,7 @@ final class SocialWidget: WidgetContainer, ObservableObject {
                 case .large:
                     largeLayout(theme: theme)
                 case .xlarge:
-                    xlargeLayout(theme: theme)
+                    largeLayout(theme: theme) // Use large layout for xlarge
                 }
             }
         )
@@ -152,65 +152,6 @@ final class SocialWidget: WidgetContainer, ObservableObject {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
-    private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 20) {
-            // Left side - Recent notifications
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Recent Activity")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(theme.textPrimary)
-                    
-                    Spacer()
-                    
-                    notificationBadge(count: content.unreadCount, theme: theme)
-                }
-                
-                VStack(spacing: 8) {
-                    ForEach(content.recentNotifications, id: \.id) { notification in
-                        self.notificationRowDetailed(notification, theme: theme)
-                    }
-                }
-                
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-            
-            Divider()
-                .frame(height: 140)
-            
-            // Right side - Platform summary
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Platforms")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(theme.textPrimary)
-                
-                VStack(spacing: 8) {
-                    ForEach(content.platformSummary, id: \.platform) { summary in
-                        self.platformRow(summary, theme: theme)
-                    }
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(content.totalNotifications) total")
-                        .font(.caption)
-                        .foregroundColor(theme.textSecondary)
-                    
-                    if let lastUpdated = content.lastUpdated {
-                        Text("Updated: \(formatTime(lastUpdated))")
-                            .font(.caption)
-                            .foregroundColor(theme.textSecondary)
-                    }
-                }
-            }
-            .frame(width: 160)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
     
     // MARK: - Helper Views
     

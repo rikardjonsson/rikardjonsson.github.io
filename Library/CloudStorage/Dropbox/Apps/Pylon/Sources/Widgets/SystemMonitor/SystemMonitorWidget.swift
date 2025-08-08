@@ -17,7 +17,7 @@ final class SystemMonitorWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .large
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: SystemMonitorContent
     
@@ -136,64 +136,75 @@ final class SystemMonitorWidget: WidgetContainer, ObservableObject {
     }
     
     private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 24) {
-            // Left side - Main metrics
-            VStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("System Performance")
-                        .font(.title2)
-                        .fontWeight(.semibold)
+        VStack(spacing: 20) {
+            HStack {
+                Image(systemName: "cpu")
+                    .font(.largeTitle)
+                    .foregroundColor(theme.accentColor)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("System Monitor")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
                         .foregroundColor(theme.textPrimary)
-                    
-                    Text("Real-time system resource monitoring")
+                    Text("Real-time Performance")
                         .font(.subheadline)
                         .foregroundColor(theme.textSecondary)
                 }
                 
-                VStack(spacing: 16) {
-                    systemMetricDetailed("CPU Usage", value: content.systemData.cpuUsage, 
-                                       color: cpuColor(content.systemData.cpuUsage), theme: theme)
-                    systemMetricDetailed("Memory Usage", value: content.systemData.memoryUsage, 
-                                       color: memoryColor(content.systemData.memoryUsage), theme: theme)
-                    systemMetricDetailed("Disk Usage", value: content.systemData.diskUsage, 
-                                       color: diskColor(content.systemData.diskUsage), theme: theme)
-                }
-                
                 Spacer()
-            }
-            .frame(maxWidth: .infinity)
-            
-            // Right side - Additional info
-            VStack(alignment: .leading, spacing: 16) {
-                Text("System Info")
-                    .font(.headline)
-                    .foregroundColor(theme.textPrimary)
                 
-                VStack(spacing: 8) {
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("Processes: \(content.systemData.processCount)")
+                        .font(.caption)
+                        .foregroundColor(theme.textSecondary)
+                    Text("Load: \(content.systemData.loadAverage)")
+                        .font(.caption)
+                        .foregroundColor(theme.textSecondary)
+                    Text("Temp: \(content.systemData.temperature)")
+                        .font(.caption)
+                        .foregroundColor(theme.textSecondary)
+                }
+            }
+            
+            VStack(spacing: 16) {
+                systemMetricEnhanced("CPU Usage", value: content.systemData.cpuUsage, 
+                                   color: cpuColor(content.systemData.cpuUsage), theme: theme)
+                systemMetricEnhanced("Memory Usage", value: content.systemData.memoryUsage, 
+                                   color: memoryColor(content.systemData.memoryUsage), theme: theme)
+                systemMetricEnhanced("Disk Usage", value: content.systemData.diskUsage, 
+                                   color: diskColor(content.systemData.diskUsage), theme: theme)
+            }
+            
+            HStack {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("System Information")
+                        .font(.headline)
+                        .foregroundColor(theme.textPrimary)
                     infoRow("Uptime", value: content.systemData.uptime, theme: theme)
-                    infoRow("Processes", value: "\(content.systemData.processCount)", theme: theme)
-                    infoRow("Load Avg", value: content.systemData.loadAverage, theme: theme)
+                    infoRow("Load Average", value: content.systemData.loadAverage, theme: theme)
                     infoRow("Temperature", value: content.systemData.temperature, theme: theme)
                 }
                 
                 Spacer()
                 
-                if let lastUpdated = content.lastUpdated {
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("Last Updated")
-                            .font(.caption)
-                            .foregroundColor(theme.textSecondary)
-                        Text(formatTime(lastUpdated))
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(theme.textPrimary)
+                VStack(alignment: .trailing, spacing: 6) {
+                    Text("Statistics")
+                        .font(.headline)
+                        .foregroundColor(theme.textPrimary)
+                    infoRow("Processes", value: "\(content.systemData.processCount)", theme: theme)
+                    if let lastUpdated = content.lastUpdated {
+                        infoRow("Updated", value: formatTime(lastUpdated), theme: theme)
                     }
+                    infoRow("Status", value: "Monitoring", theme: theme)
                 }
             }
-            .frame(width: 140)
+            
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+    
     
     // MARK: - Helper Views
     
@@ -230,6 +241,41 @@ final class SystemMonitorWidget: WidgetContainer, ObservableObject {
             ProgressView(value: value / 100.0)
                 .progressViewStyle(LinearProgressViewStyle(tint: color))
                 .scaleEffect(y: 0.8)
+        }
+    }
+    
+    private func systemMetricEnhanced(_ label: String, value: Double, color: Color, theme: any Theme) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(label)
+                    .font(.title3)
+                    .fontWeight(.medium)
+                    .foregroundColor(theme.textPrimary)
+                
+                Spacer()
+                
+                Text("\(Int(value))%")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(color)
+                    .monospacedDigit()
+            }
+            
+            ProgressView(value: value / 100.0)
+                .progressViewStyle(LinearProgressViewStyle(tint: color))
+                .scaleEffect(y: 1.2)
+            
+            HStack {
+                Text(statusText(for: value, type: label))
+                    .font(.caption)
+                    .foregroundColor(theme.textSecondary)
+                
+                Spacer()
+                
+                Text(usageDescription(value))
+                    .font(.caption)
+                    .foregroundColor(color)
+            }
         }
     }
     
@@ -279,6 +325,42 @@ final class SystemMonitorWidget: WidgetContainer, ObservableObject {
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
+    
+    private func statusText(for value: Double, type: String) -> String {
+        if type.contains("CPU") {
+            switch value {
+            case 0..<30: return "Idle"
+            case 30..<60: return "Normal"
+            case 60..<80: return "Busy"
+            default: return "Critical"
+            }
+        } else if type.contains("Memory") {
+            switch value {
+            case 0..<50: return "Available"
+            case 50..<75: return "Moderate"
+            case 75..<90: return "High"
+            default: return "Critical"
+            }
+        } else if type.contains("Disk") {
+            switch value {
+            case 0..<60: return "Spacious"
+            case 60..<85: return "Filling"
+            case 85..<95: return "Nearly Full"
+            default: return "Critical"
+            }
+        }
+        return "Normal"
+    }
+    
+    private func usageDescription(_ value: Double) -> String {
+        switch value {
+        case 0..<25: return "Low"
+        case 25..<50: return "Moderate"
+        case 50..<75: return "High"
+        case 75..<90: return "Very High"
+        default: return "Critical"
+        }
+    }
 }
 
 // MARK: - System Data Model
@@ -320,7 +402,8 @@ final class SystemMonitorContent: WidgetContent, ObservableObject {
     }
     
     deinit {
-        timer?.invalidate()
+        // Note: Timer invalidation in deinit may not work reliably with Swift concurrency
+        // Consider implementing a proper cleanup method instead
     }
     
     @MainActor

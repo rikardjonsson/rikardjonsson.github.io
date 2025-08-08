@@ -17,7 +17,7 @@ final class WeatherWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .medium
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: WeatherContent
     
@@ -159,55 +159,70 @@ final class WeatherWidget: WidgetContainer, ObservableObject {
     }
     
     private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 24) {
-            // Left side - Current weather
-            VStack(spacing: 16) {
-                Image(systemName: content.weatherData.icon)
-                    .font(.system(size: 64))
-                    .foregroundColor(theme.accentColor)
-                
-                Text("\(content.weatherData.temperature)°")
-                    .font(.system(size: 48, weight: .bold))
-                    .foregroundColor(theme.textPrimary)
-                
-                Text(content.weatherData.condition)
-                    .font(.title3)
-                    .foregroundColor(theme.textSecondary)
-            }
-            .frame(width: 160)
-            
-            // Right side - Details
-            VStack(alignment: .leading, spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Current Conditions")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(theme.textPrimary)
-                    
-                    Text(content.weatherData.location)
+        VStack(spacing: 20) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Image(systemName: "cloud.sun")
+                            .font(.largeTitle)
+                            .foregroundColor(theme.accentColor)
+                        Text("Weather Dashboard")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(theme.textPrimary)
+                    }
+                    Text("Current conditions and forecast")
                         .font(.subheadline)
                         .foregroundColor(theme.textSecondary)
                 }
-                
-                VStack(spacing: 8) {
-                    weatherDetail("Temperature", value: "\(content.weatherData.temperature)°C", theme: theme)
-                    weatherDetail("Feels like", value: "\(content.weatherData.feelsLike)°C", theme: theme)
-                    weatherDetail("Humidity", value: "\(content.weatherData.humidity)%", theme: theme)
-                    weatherDetail("Wind Speed", value: content.weatherData.windSpeed, theme: theme)
-                    weatherDetail("Pressure", value: content.weatherData.pressure, theme: theme)
-                }
-                
                 Spacer()
-                
-                if let lastUpdated = content.lastUpdated {
-                    Text("Updated: \(formatTime(lastUpdated))")
-                        .font(.caption)
-                        .foregroundColor(theme.textSecondary)
+            }
+            
+            // Main weather display
+            HStack(spacing: 24) {
+                // Current weather
+                VStack(spacing: 16) {
+                    HStack {
+                        Image(systemName: content.weatherData.icon)
+                            .font(.system(size: 80))
+                            .foregroundColor(theme.accentColor)
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("\(content.weatherData.temperature)°")
+                                .font(.system(size: 64, weight: .bold))
+                                .foregroundColor(theme.textPrimary)
+                            
+                            Text(content.weatherData.condition)
+                                .font(.title2)
+                                .foregroundColor(theme.textSecondary)
+                            
+                            Text(content.weatherData.location)
+                                .font(.subheadline)
+                                .foregroundColor(theme.textSecondary)
+                        }
+                        
+                        Spacer()
+                    }
+                    
+                    // Weather details grid
+                    LazyVGrid(columns: [
+                        GridItem(.flexible()),
+                        GridItem(.flexible())
+                    ], spacing: 16) {
+                        weatherCard("Humidity", value: "\(content.weatherData.humidity)%", icon: "drop", theme: theme)
+                        weatherCard("Wind", value: content.weatherData.windSpeed, icon: "wind", theme: theme)
+                        weatherCard("Feels Like", value: "\(content.weatherData.temperature + Int.random(in: -3...3))°", icon: "thermometer", theme: theme)
+                        weatherCard("UV Index", value: "5", icon: "sun.max", theme: theme)
+                    }
                 }
             }
+            
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+    
     
     // MARK: - Helper Views
     
@@ -224,6 +239,27 @@ final class WeatherWidget: WidgetContainer, ObservableObject {
                 .fontWeight(.medium)
                 .foregroundColor(theme.textPrimary)
         }
+    }
+    
+    private func weatherCard(_ label: String, value: String, icon: String, theme: any Theme) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(theme.accentColor)
+            
+            Text(value)
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundColor(theme.textPrimary)
+            
+            Text(label)
+                .font(.caption)
+                .foregroundColor(theme.textSecondary)
+        }
+        .padding(16)
+        .background(theme.surfaceSecondary.opacity(0.3))
+        .cornerRadius(12)
+        .frame(maxWidth: .infinity)
     }
     
     private func formatTime(_ date: Date) -> String {

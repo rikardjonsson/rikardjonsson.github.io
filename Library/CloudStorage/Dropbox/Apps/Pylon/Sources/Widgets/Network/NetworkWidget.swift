@@ -15,13 +15,13 @@ final class NetworkWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .medium
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: NetworkContent
     
-    let title = "Network"
+    let title = "NETWORK_SCAN"
     let category = WidgetCategory.system
-    let supportedSizes: [WidgetSize] = [.small, .medium, .large]
+    let supportedSizes: [WidgetSize] = [.small, .medium, .large, .xlarge]
     
     var lastUpdated: Date? { content.lastUpdated }
     var isLoading: Bool { content.isLoading }
@@ -58,8 +58,8 @@ final class NetworkWidget: WidgetContainer, ObservableObject {
                             Image(systemName: "wifi")
                                 .font(.title2)
                                 .foregroundColor(theme.accentColor)
-                            Text("Network")
-                                .font(.headline)
+            Text("NET_SCAN")
+                                .font(.system(.headline, design: .monospaced))
                                 .foregroundColor(theme.textPrimary)
                             Spacer()
                             Circle()
@@ -81,7 +81,7 @@ final class NetworkWidget: WidgetContainer, ObservableObject {
                         }
                         Spacer()
                     }
-                case .large, .xlarge:
+                case .large:
                     VStack(spacing: 12) {
                         HStack {
                             Image(systemName: "wifi")
@@ -101,6 +101,43 @@ final class NetworkWidget: WidgetContainer, ObservableObject {
                             networkRow("Download", value: "\(content.downloadSpeed) Mbps", theme: theme)
                             networkRow("Upload", value: "\(content.uploadSpeed) Mbps", theme: theme)
                             networkRow("Ping", value: "\(content.ping) ms", theme: theme)
+                        }
+                        Spacer()
+                    }
+                case .xlarge:
+                    VStack(spacing: 16) {
+                        HStack {
+                            Image(systemName: "wifi")
+                                .font(.largeTitle)
+                                .foregroundColor(theme.accentColor)
+                            Text("Network Monitor")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(theme.textPrimary)
+                            Spacer()
+                            Circle()
+                                .fill(content.isConnected ? .green : .red)
+                                .frame(width: 16, height: 16)
+                        }
+                        
+                        HStack(spacing: 20) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Connection")
+                                    .font(.headline)
+                                    .foregroundColor(theme.textPrimary)
+                                networkRow("Network", value: content.networkName, theme: theme)
+                                networkRow("Status", value: content.isConnected ? "Connected" : "Disconnected", theme: theme)
+                                networkRow("Signal", value: content.signalStrength, theme: theme)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Performance")
+                                    .font(.headline)
+                                    .foregroundColor(theme.textPrimary)
+                                networkRow("Download", value: "\(content.downloadSpeed) Mbps", theme: theme)
+                                networkRow("Upload", value: "\(content.uploadSpeed) Mbps", theme: theme)
+                                networkRow("Ping", value: "\(content.ping) ms", theme: theme)
+                            }
                         }
                         Spacer()
                     }

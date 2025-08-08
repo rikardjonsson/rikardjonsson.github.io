@@ -18,6 +18,9 @@ struct GridContainerView: View {
     /// Theme for styling
     let theme: any Theme
     
+    /// Widget manager for synchronization (optional)
+    let widgetManager: WidgetManager?
+    
     /// Current drag state
     @State private var draggedWidget: UUID?
     @State private var dragPosition: CGPoint = .zero
@@ -29,7 +32,8 @@ struct GridContainerView: View {
     init(
         configuration: GridConfiguration = .standard,
         theme: any Theme,
-        widgets: [any GridWidget] = []
+        widgets: [any GridWidget] = [],
+        widgetManager: WidgetManager? = nil
     ) {
         let manager = GridManager(configuration: configuration)
         
@@ -42,6 +46,7 @@ struct GridContainerView: View {
         
         self._gridManager = State(initialValue: manager)
         self.theme = theme
+        self.widgetManager = widgetManager
     }
     
     var body: some View {
@@ -226,7 +231,15 @@ struct GridContainerView: View {
         withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
             // Attempt to move widget to preview position
             if let targetPosition = dragPreviewPosition, shouldMove {
-                gridManager.moveWidget(id: widget.id, to: targetPosition)
+                // Use WidgetManager if available, otherwise use GridManager directly
+                if let widgetManager = widgetManager {
+                    let success = widgetManager.moveContainer(id: widget.id, to: targetPosition)
+                    if !success {
+                        print("⚠️ Failed to move widget via WidgetManager")
+                    }
+                } else {
+                    gridManager.moveWidget(id: widget.id, to: targetPosition)
+                }
             }
             
             // Clean up drag state with animation

@@ -17,7 +17,7 @@ final class ShoppingWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .large
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: ShoppingContent
     
@@ -59,7 +59,7 @@ final class ShoppingWidget: WidgetContainer, ObservableObject {
                 case .large:
                     largeLayout(theme: theme)
                 case .xlarge:
-                    xlargeLayout(theme: theme)
+                    largeLayout(theme: theme) // Use large layout for xlarge
                 }
             }
         )
@@ -222,102 +222,6 @@ final class ShoppingWidget: WidgetContainer, ObservableObject {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
-    private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 20) {
-            // Left side - Cart items
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Cart")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(theme.textPrimary)
-                    
-                    Spacer()
-                    
-                    cartBadge(count: content.cartItems.count, theme: theme)
-                }
-                
-                if !content.cartItems.isEmpty {
-                    VStack(spacing: 8) {
-                        ForEach(content.cartItems, id: \.id) { item in
-                            self.cartItemRowDetailed(item, theme: theme)
-                        }
-                    }
-                    
-                    Divider()
-                    
-                    HStack {
-                        Text("Subtotal")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(theme.textPrimary)
-                        
-                        Spacer()
-                        
-                        Text(String(format: "$%.2f", content.cartTotal))
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundColor(theme.accentColor)
-                    }
-                } else {
-                    emptyState(theme: theme)
-                }
-                
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-            
-            Divider()
-                .frame(height: 140)
-            
-            // Right side - Recent orders & wishlist
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Recent")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(theme.textPrimary)
-                
-                if !content.recentOrders.isEmpty {
-                    VStack(spacing: 8) {
-                        ForEach(Array(content.recentOrders.prefix(5)), id: \.id) { order in
-                            self.orderRow(order, theme: theme, compact: false)
-                        }
-                    }
-                } else {
-                    Text("No recent orders")
-                        .font(.caption)
-                        .foregroundColor(theme.textSecondary)
-                }
-                
-                if !content.wishlistItems.isEmpty {
-                    Divider()
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Wishlist")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(theme.textPrimary)
-                        
-                        VStack(spacing: 6) {
-                            ForEach(Array(content.wishlistItems.prefix(3)), id: \.id) { item in
-                                self.wishlistItemRow(item, theme: theme)
-                            }
-                        }
-                    }
-                }
-                
-                Spacer()
-                
-                if let lastUpdated = content.lastUpdated {
-                    Text("Updated: \(formatTime(lastUpdated))")
-                        .font(.caption)
-                        .foregroundColor(theme.textSecondary)
-                }
-            }
-            .frame(width: 180)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
     
     // MARK: - Helper Views
     

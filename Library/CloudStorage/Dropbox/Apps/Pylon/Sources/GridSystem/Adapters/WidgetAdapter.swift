@@ -31,14 +31,16 @@ struct WidgetContainerAdapter: GridWidget {
         self.id = container.id
         self.title = container.title
         
-        // Convert size
+        // Convert size - ensure dimensions match
         switch container.size {
         case .small:
-            self.size = .small
+            self.size = .small    // 1×1 -> 1×1
         case .medium:
-            self.size = .medium  
+            self.size = .medium   // 2×2 -> 2×2  
         case .large:
-            self.size = .large
+            self.size = .large    // 4×2 -> 4×2
+        case .xlarge:
+            self.size = .extraLarge // 4×4 -> 4×4
         }
         
         print("🔄 WidgetAdapter converting \(container.title): \(container.size) -> \(self.size)")

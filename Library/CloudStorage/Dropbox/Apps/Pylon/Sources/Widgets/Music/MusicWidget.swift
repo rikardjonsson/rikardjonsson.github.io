@@ -15,7 +15,7 @@ final class MusicWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .medium
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: MusicContent
     
@@ -157,84 +157,123 @@ final class MusicWidget: WidgetContainer, ObservableObject {
                         Spacer()
                     }
                 case .xlarge:
-                    HStack(spacing: 20) {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Now Playing")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(theme.textPrimary)
+                    VStack(spacing: 20) {
+                        HStack {
+                            Image(systemName: "music.note")
+                                .font(.largeTitle)
+                                .foregroundColor(theme.accentColor)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Music Player")
+                                    .font(.largeTitle)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(theme.textPrimary)
+                                Text("Premium Experience")
+                                    .font(.subheadline)
+                                    .foregroundColor(theme.textSecondary)
+                            }
+                            Spacer()
                             
-                            if let track = content.currentTrack {
-                                VStack(alignment: .leading, spacing: 8) {
+                            // Status indicators
+                            VStack(alignment: .trailing, spacing: 4) {
+                                HStack(spacing: 8) {
+                                    if content.isShuffled {
+                                        Image(systemName: "shuffle")
+                                            .font(.caption)
+                                            .foregroundColor(theme.accentColor)
+                                    }
+                                    if content.isRepeating {
+                                        Image(systemName: "repeat")
+                                            .font(.caption)
+                                            .foregroundColor(theme.accentColor)
+                                    }
+                                }
+                                Text(content.isPlaying ? "Playing" : "Paused")
+                                    .font(.caption)
+                                    .foregroundColor(theme.textSecondary)
+                            }
+                        }
+                        
+                        if let track = content.currentTrack {
+                            VStack(spacing: 16) {
+                                // Track info with larger spacing
+                                VStack(spacing: 8) {
                                     Text(track.title)
-                                        .font(.title3)
-                                        .fontWeight(.semibold)
+                                        .font(.title)
+                                        .fontWeight(.bold)
                                         .foregroundColor(theme.textPrimary)
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.center)
                                     
-                                    Text(track.artist)
+                                    Text("by \(track.artist)")
+                                        .font(.title3)
+                                        .foregroundColor(theme.textSecondary)
+                                        .lineLimit(1)
+                                    
+                                    Text("from \(track.album)")
                                         .font(.subheadline)
                                         .foregroundColor(theme.textSecondary)
-                                    
-                                    Text(track.album)
-                                        .font(.caption)
-                                        .foregroundColor(theme.textSecondary.opacity(0.8))
-                                    
+                                        .lineLimit(1)
+                                }
+                                
+                                // Enhanced progress bar with larger text
+                                VStack(spacing: 8) {
                                     ProgressView(value: content.progress)
                                         .progressViewStyle(LinearProgressViewStyle(tint: theme.accentColor))
+                                        .scaleEffect(y: 1.2)
                                     
                                     HStack {
                                         Text(formatTime(content.currentTime))
-                                            .font(.caption2)
+                                            .font(.callout)
                                             .foregroundColor(theme.textSecondary)
+                                            .monospacedDigit()
+                                        Spacer()
+                                        Text("-\(formatTime(track.duration - content.currentTime))")
+                                            .font(.callout)
+                                            .foregroundColor(theme.textSecondary)
+                                            .monospacedDigit()
                                         Spacer()
                                         Text(formatTime(track.duration))
-                                            .font(.caption2)
+                                            .font(.callout)
                                             .foregroundColor(theme.textSecondary)
+                                            .monospacedDigit()
                                     }
                                 }
-                            }
-                            Spacer()
-                        }
-                        .frame(maxWidth: .infinity)
-                        
-                        VStack(spacing: 16) {
-                            Text("Controls")
-                                .font(.headline)
-                                .foregroundColor(theme.textPrimary)
-                            
-                            VStack(spacing: 12) {
-                                HStack(spacing: 16) {
-                                    Button(action: {}) {
-                                        Image(systemName: "backward.fill")
-                                            .foregroundColor(theme.textSecondary)
-                                    }
-                                    Button(action: {}) {
-                                        Image(systemName: content.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                                            .font(.system(size: 40))
-                                            .foregroundColor(theme.accentColor)
-                                    }
-                                    Button(action: {}) {
-                                        Image(systemName: "forward.fill")
-                                            .foregroundColor(theme.textSecondary)
-                                    }
-                                }
-                                .font(.title2)
                                 
-                                HStack(spacing: 16) {
+                                // Enhanced control buttons with more options
+                                HStack(spacing: 32) {
                                     Button(action: {}) {
                                         Image(systemName: "shuffle")
+                                            .font(.title3)
                                             .foregroundColor(content.isShuffled ? theme.accentColor : theme.textSecondary)
                                     }
+                                    
+                                    Button(action: {}) {
+                                        Image(systemName: "backward.end.fill")
+                                            .font(.title2)
+                                            .foregroundColor(theme.textSecondary)
+                                    }
+                                    
+                                    Button(action: {}) {
+                                        Image(systemName: content.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                            .font(.system(size: 48))
+                                            .foregroundColor(theme.accentColor)
+                                    }
+                                    
+                                    Button(action: {}) {
+                                        Image(systemName: "forward.end.fill")
+                                            .font(.title2)
+                                            .foregroundColor(theme.textSecondary)
+                                    }
+                                    
                                     Button(action: {}) {
                                         Image(systemName: "repeat")
+                                            .font(.title3)
                                             .foregroundColor(content.isRepeating ? theme.accentColor : theme.textSecondary)
                                     }
                                 }
-                                .font(.title3)
                             }
-                            Spacer()
                         }
-                        .frame(width: 120)
+                        Spacer()
                     }
                 }
             }

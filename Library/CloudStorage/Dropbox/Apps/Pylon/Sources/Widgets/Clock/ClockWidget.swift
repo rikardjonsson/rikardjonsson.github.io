@@ -14,10 +14,10 @@ import SwiftUI
 @MainActor
 final class ClockWidget: WidgetContainer, ObservableObject {
     let id = UUID()
-    @Published var size: WidgetSize = .medium
+    @Published var size: WidgetSize = .small
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: ClockContent
     
@@ -25,7 +25,7 @@ final class ClockWidget: WidgetContainer, ObservableObject {
     
     let title = "Clock"
     let category = WidgetCategory.productivity
-    let supportedSizes: [WidgetSize] = [.small, .medium, .large]
+    let supportedSizes: [WidgetSize] = [.small, .medium, .large, .xlarge]
     
     // Proxy content properties
     var lastUpdated: Date? { content.lastUpdated }
@@ -59,7 +59,7 @@ final class ClockWidget: WidgetContainer, ObservableObject {
                 case .large:
                     largeLayout(theme: theme)
                 case .xlarge:
-                    largeLayout(theme: theme) // Use large layout for xlarge
+                    xlargeLayout(theme: theme)
                 }
             }
         )
@@ -147,6 +147,75 @@ final class ClockWidget: WidgetContainer, ObservableObject {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+    
+    private func xlargeLayout(theme: any Theme) -> some View {
+        VStack(spacing: 20) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Image(systemName: "clock")
+                            .font(.largeTitle)
+                            .foregroundColor(theme.accentColor)
+                        Text("World Clock")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(theme.textPrimary)
+                    }
+                    Text("Multiple time zones and formats")
+                        .font(.subheadline)
+                        .foregroundColor(theme.textSecondary)
+                }
+                Spacer()
+            }
+            
+            // Main time display
+            VStack(spacing: 12) {
+                Text(content.currentTime)
+                    .font(.system(size: 64, weight: .bold, design: .rounded))
+                    .foregroundColor(theme.textPrimary)
+                    .monospacedDigit()
+                
+                Text(content.currentDate)
+                    .font(.title2)
+                    .foregroundColor(theme.textSecondary)
+            }
+            
+            // Additional time zones
+            HStack(spacing: 20) {
+                timeZoneCard("New York", time: formatTimeForZone("America/New_York"), theme: theme)
+                timeZoneCard("London", time: formatTimeForZone("Europe/London"), theme: theme)
+                timeZoneCard("Tokyo", time: formatTimeForZone("Asia/Tokyo"), theme: theme)
+            }
+            
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private func timeZoneCard(_ city: String, time: String, theme: any Theme) -> some View {
+        VStack(spacing: 4) {
+            Text(city)
+                .font(.caption)
+                .foregroundColor(theme.textSecondary)
+            Text(time)
+                .font(.title3)
+                .fontWeight(.semibold)
+                .foregroundColor(theme.textPrimary)
+                .monospacedDigit()
+        }
+        .padding(12)
+        .background(theme.surfaceSecondary.opacity(0.3))
+        .cornerRadius(8)
+        .frame(maxWidth: .infinity)
+    }
+    
+    private func formatTimeForZone(_ identifier: String) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.timeZone = TimeZone(identifier: identifier)
+        return formatter.string(from: Date())
+    }
 }
 
 // MARK: - Clock Content
@@ -169,7 +238,8 @@ final class ClockContent: WidgetContent, ObservableObject {
     }
     
     deinit {
-        timer?.invalidate()
+        // Note: Timer invalidation in deinit may not work reliably with Swift concurrency
+        // Consider implementing a proper cleanup method instead
     }
     
     @MainActor

@@ -17,7 +17,7 @@ final class TravelWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .large
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: TravelContent
     
@@ -25,7 +25,7 @@ final class TravelWidget: WidgetContainer, ObservableObject {
     
     let title = "Travel"
     let category = WidgetCategory.information
-    let supportedSizes: [WidgetSize] = [.medium, .large, .xlarge]
+    let supportedSizes: [WidgetSize] = [.small, .medium, .large, .xlarge]
     
     // Proxy content properties
     var lastUpdated: Date? { content.lastUpdated }
@@ -59,7 +59,7 @@ final class TravelWidget: WidgetContainer, ObservableObject {
                 case .large:
                     largeLayout(theme: theme)
                 case .xlarge:
-                    xlargeLayout(theme: theme)
+                    largeLayout(theme: theme) // Use large layout for xlarge
                 }
             }
         )
@@ -157,83 +157,6 @@ final class TravelWidget: WidgetContainer, ObservableObject {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
-    private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 20) {
-            // Left side - Upcoming trips
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Upcoming")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(theme.textPrimary)
-                    
-                    Spacer()
-                    
-                    if let nextTrip = content.upcomingTrips.first {
-                        tripStatusIndicator(nextTrip, theme: theme)
-                    }
-                }
-                
-                if !content.upcomingTrips.isEmpty {
-                    VStack(spacing: 10) {
-                        ForEach(content.upcomingTrips, id: \.id) { trip in
-                            self.tripRowDetailed(trip, theme: theme)
-                        }
-                    }
-                } else {
-                    emptyState(theme: theme)
-                }
-                
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-            
-            Divider()
-                .frame(height: 140)
-            
-            // Right side - Recent trips & stats
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Travel Stats")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(theme.textPrimary)
-                
-                VStack(spacing: 10) {
-                    travelStat("Miles This Year", value: "\(content.stats.milesThisYear)K", 
-                             icon: "airplane", color: .blue, theme: theme)
-                    travelStat("Countries Visited", value: "\(content.stats.countriesVisited)", 
-                             icon: "globe", color: .green, theme: theme)
-                    travelStat("Trips Completed", value: "\(content.stats.tripsCompleted)", 
-                             icon: "checkmark.circle", color: .orange, theme: theme)
-                }
-                
-                if !content.recentTrips.isEmpty {
-                    Divider()
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Recent")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(theme.textPrimary)
-                        
-                        ForEach(Array(content.recentTrips.prefix(3)), id: \.id) { trip in
-                            self.recentTripRow(trip, theme: theme)
-                        }
-                    }
-                }
-                
-                Spacer()
-                
-                if let lastUpdated = content.lastUpdated {
-                    Text("Updated: \(formatTime(lastUpdated))")
-                        .font(.caption)
-                        .foregroundColor(theme.textSecondary)
-                }
-            }
-            .frame(width: 180)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
     
     // MARK: - Helper Views
     

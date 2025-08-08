@@ -17,7 +17,7 @@ final class CalendarWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .large
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: CalendarContent
     
@@ -141,43 +141,63 @@ final class CalendarWidget: WidgetContainer, ObservableObject {
     }
     
     private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 20) {
-            // Left side - Today's events
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Today")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(theme.textPrimary)
-                
-                VStack(spacing: 6) {
-                    ForEach(content.todayEvents, id: \.id) { event in
-                        self.eventRow(event, theme: theme, compact: false)
+        VStack(spacing: 16) {
+            // Header with month view
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Image(systemName: "calendar")
+                            .font(.largeTitle)
+                            .foregroundColor(theme.accentColor)
+                        Text("Calendar Dashboard")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(theme.textPrimary)
                     }
+                    Text("\(content.todayEvents.count) events today • \(content.upcomingEvents.count) upcoming")
+                        .font(.subheadline)
+                        .foregroundColor(theme.textSecondary)
                 }
-                
                 Spacer()
             }
-            .frame(maxWidth: .infinity)
             
-            Divider()
-                .frame(height: 120)
-            
-            // Right side - Upcoming events
-            VStack(alignment: .leading, spacing: 12) {
-                Text("This Week")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(theme.textPrimary)
-                
-                VStack(spacing: 6) {
-                    ForEach(Array(content.upcomingEvents.prefix(6)), id: \.id) { event in
-                        self.eventRow(event, theme: theme, compact: true)
+            HStack(spacing: 16) {
+                // Today's events column
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Today")
+                        .font(.headline)
+                        .foregroundColor(theme.textPrimary)
+                    
+                    ScrollView {
+                        VStack(spacing: 6) {
+                            ForEach(content.todayEvents, id: \.id) { event in
+                                eventCardDetailed(event, theme: theme, isToday: true)
+                            }
+                        }
                     }
+                    .scrollIndicators(.hidden)
                 }
+                .frame(maxWidth: .infinity)
                 
-                Spacer()
+                // Upcoming events column
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("This Week")
+                        .font(.headline)
+                        .foregroundColor(theme.textPrimary)
+                    
+                    ScrollView {
+                        VStack(spacing: 6) {
+                            ForEach(Array(content.upcomingEvents.prefix(8)), id: \.id) { event in
+                                eventCardDetailed(event, theme: theme, isToday: false)
+                            }
+                        }
+                    }
+                    .scrollIndicators(.hidden)
+                }
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: .infinity)
+            
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -208,9 +228,54 @@ final class CalendarWidget: WidgetContainer, ObservableObject {
         }
     }
     
+    private func eventCardDetailed(_ event: CalendarEvent, theme: any Theme, isToday: Bool) -> some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(event.color)
+                .frame(width: 12, height: 12)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(event.title)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(theme.textPrimary)
+                    .lineLimit(1)
+                
+                HStack {
+                    if event.isAllDay {
+                        Text("All day")
+                            .font(.caption)
+                            .foregroundColor(theme.textSecondary)
+                    } else {
+                        Text(formatTime(event.startTime))
+                            .font(.caption)
+                            .foregroundColor(theme.textSecondary)
+                    }
+                    
+                    if !isToday {
+                        Text("• \(formatDate(event.startTime))")
+                            .font(.caption)
+                            .foregroundColor(theme.textSecondary)
+                    }
+                }
+            }
+            
+            Spacer()
+        }
+        .padding(8)
+        .background(theme.surfaceSecondary.opacity(0.3))
+        .cornerRadius(6)
+    }
+    
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
         return formatter.string(from: date)
     }
 }

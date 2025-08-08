@@ -17,7 +17,7 @@ final class NotesWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .medium
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: NotesContent
     
@@ -96,20 +96,40 @@ final class NotesWidget: WidgetContainer, ObservableObject {
                         Spacer()
                     }
                 case .xlarge:
-                    HStack(spacing: 20) {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Recent Notes")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(theme.textPrimary)
-                            VStack(spacing: 8) {
-                                ForEach(content.notes, id: \.id) { note in
-                                    self.noteRowDetailed(note, theme: theme)
+                    VStack(spacing: 16) {
+                        // Header with stats
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Image(systemName: "note.text")
+                                        .font(.largeTitle)
+                                        .foregroundColor(theme.accentColor)
+                                    Text("Notes Library")
+                                        .font(.largeTitle)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(theme.textPrimary)
                                 }
+                                Text("\(content.notes.count) notes • Last updated \(formatDate(content.lastUpdated ?? Date()))")
+                                    .font(.subheadline)
+                                    .foregroundColor(theme.textSecondary)
                             }
                             Spacer()
                         }
-                        .frame(maxWidth: .infinity)
+                        
+                        // Notes grid with detailed view
+                        ScrollView {
+                            LazyVGrid(columns: [
+                                GridItem(.flexible(), spacing: 12),
+                                GridItem(.flexible(), spacing: 12)
+                            ], spacing: 12) {
+                                ForEach(content.notes, id: \.id) { note in
+                                    self.noteCard(note, theme: theme)
+                                }
+                            }
+                        }
+                        .scrollIndicators(.hidden)
+                        
+                        Spacer()
                     }
                 }
             }
@@ -157,6 +177,38 @@ final class NotesWidget: WidgetContainer, ObservableObject {
                 .lineLimit(3)
         }
         .padding(.vertical, 4)
+    }
+    
+    private func noteCard(_ note: Note, theme: any Theme) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(note.title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(theme.textPrimary)
+                    .lineLimit(1)
+                Spacer()
+            }
+            
+            Text(note.preview)
+                .font(.caption)
+                .foregroundColor(theme.textSecondary)
+                .lineLimit(4)
+                .multilineTextAlignment(.leading)
+            
+            Spacer()
+            
+            HStack {
+                Spacer()
+                Text(formatDate(note.modifiedDate))
+                    .font(.caption2)
+                    .foregroundColor(theme.textSecondary)
+            }
+        }
+        .padding(8)
+        .frame(height: 100)
+        .background(theme.cardBackground.opacity(0.5))
+        .cornerRadius(8)
     }
     
     private func formatDate(_ date: Date) -> String {

@@ -18,8 +18,8 @@ struct PylonApp: App {
                 .environmentObject(appState)
         }
         .windowStyle(.hiddenTitleBar)
-        .windowResizability(.contentSize)
-        .defaultSize(width: 800, height: 600)
+        .windowResizability(.contentMinSize) // Allow resizing in both directions
+        .defaultSize(width: 1200, height: 800) // Better default size for widget layout
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About Pylon") {

@@ -17,7 +17,7 @@ final class EmailWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .large
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: EmailContent
     
@@ -103,7 +103,7 @@ final class EmailWidget: WidgetContainer, ObservableObject {
             
             VStack(spacing: 4) {
                 ForEach(Array(content.recentEmails.prefix(3)), id: \.id) { email in
-                    self.emailRow(email, theme: theme, compact: true)
+                    emailRow(email, theme: theme, compact: true)
                 }
             }
             
@@ -136,7 +136,7 @@ final class EmailWidget: WidgetContainer, ObservableObject {
             
             VStack(spacing: 6) {
                 ForEach(Array(content.recentEmails.prefix(6)), id: \.id) { email in
-                    self.emailRow(email, theme: theme, compact: false)
+                    emailRow(email, theme: theme, compact: false)
                 }
             }
             
@@ -158,64 +158,66 @@ final class EmailWidget: WidgetContainer, ObservableObject {
     }
     
     private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 20) {
-            // Left side - Recent emails
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Recent")
-                        .font(.title2)
-                        .fontWeight(.semibold)
+        VStack(spacing: 16) {
+            // Header with detailed stats
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Image(systemName: "envelope.fill")
+                            .font(.largeTitle)
+                            .foregroundColor(theme.accentColor)
+                        Text("Email Dashboard")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(theme.textPrimary)
+                    }
+                    Text("\(content.unreadCount) unread • \(content.totalEmails) total messages")
+                        .font(.subheadline)
+                        .foregroundColor(theme.textSecondary)
+                }
+                Spacer()
+            }
+            
+            HStack(spacing: 20) {
+                // Inbox column
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Recent Messages")
+                        .font(.headline)
                         .foregroundColor(theme.textPrimary)
                     
+                    ScrollView {
+                        VStack(spacing: 6) {
+                            ForEach(content.recentEmails, id: \.id) { email in
+                                self.emailCardDetailed(email, theme: theme)
+                            }
+                        }
+                    }
+                    .scrollIndicators(.hidden)
+                }
+                .frame(maxWidth: .infinity)
+                
+                // Stats column
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Account Status")
+                        .font(.headline)
+                        .foregroundColor(theme.textPrimary)
+                    
+                    VStack(spacing: 12) {
+                        emailStatCard("Unread", count: content.unreadCount, color: .red, theme: theme)
+                        emailStatCard("Today", count: content.todayCount, color: .blue, theme: theme)
+                        emailStatCard("This Week", count: content.weekCount, color: .green, theme: theme)
+                    }
+                    
                     Spacer()
-                    
-                    unreadBadge(count: content.unreadCount, theme: theme)
                 }
-                
-                VStack(spacing: 8) {
-                    ForEach(content.recentEmails, id: \.id) { email in
-                        self.emailRowDetailed(email, theme: theme)
-                    }
-                }
-                
-                Spacer()
+                .frame(width: 160)
             }
-            .frame(maxWidth: .infinity)
             
-            Divider()
-                .frame(height: 140)
-            
-            // Right side - Account summary
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Accounts")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(theme.textPrimary)
-                
-                VStack(spacing: 8) {
-                    ForEach(content.accounts, id: \.id) { account in
-                        self.accountRow(account, theme: theme)
-                    }
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(content.totalEmails) emails")
-                        .font(.caption)
-                        .foregroundColor(theme.textSecondary)
-                    
-                    if let lastUpdated = content.lastUpdated {
-                        Text("Synced: \(formatTime(lastUpdated))")
-                            .font(.caption)
-                            .foregroundColor(theme.textSecondary)
-                    }
-                }
-            }
-            .frame(width: 180)
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+    
     
     // MARK: - Helper Views
     
@@ -378,6 +380,62 @@ final class EmailWidget: WidgetContainer, ObservableObject {
         }
     }
     
+    private func emailCardDetailed(_ email: EmailMessage, theme: any Theme) -> some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(email.isUnread ? theme.accentColor : Color.clear)
+                .frame(width: 8, height: 8)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(email.sender)
+                        .font(.subheadline)
+                        .fontWeight(email.isUnread ? .semibold : .medium)
+                        .foregroundColor(theme.textPrimary)
+                        .lineLimit(1)
+                    
+                    Spacer()
+                    
+                    Text(formatTime(email.receivedAt))
+                        .font(.caption2)
+                        .foregroundColor(theme.textSecondary)
+                }
+                
+                Text(email.subject)
+                    .font(.caption)
+                    .foregroundColor(theme.textSecondary)
+                    .lineLimit(1)
+                
+                if !email.preview.isEmpty {
+                    Text(email.preview)
+                        .font(.caption2)
+                        .foregroundColor(theme.textSecondary.opacity(0.8))
+                        .lineLimit(2)
+                }
+            }
+        }
+        .padding(8)
+        .background(email.isUnread ? theme.cardBackground.opacity(0.3) : Color.clear)
+        .cornerRadius(6)
+    }
+    
+    private func emailStatCard(_ label: String, count: Int, color: Color, theme: any Theme) -> some View {
+        VStack(spacing: 6) {
+            Text("\(count)")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(color)
+            
+            Text(label)
+                .font(.caption)
+                .foregroundColor(theme.textSecondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity)
+        .background(color.opacity(0.1))
+        .cornerRadius(8)
+    }
+    
     private func formatTime(_ date: Date) -> String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
@@ -422,6 +480,16 @@ final class EmailContent: WidgetContent, ObservableObject {
     @Published var accounts: [EmailAccount] = []
     @Published var unreadCount: Int = 0
     @Published var totalEmails: Int = 0
+    
+    var todayCount: Int {
+        let today = Calendar.current.startOfDay(for: Date())
+        return recentEmails.filter { Calendar.current.startOfDay(for: $0.receivedAt) >= today }.count
+    }
+    
+    var weekCount: Int {
+        let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+        return recentEmails.filter { $0.receivedAt >= weekAgo }.count
+    }
     
     init() {
         generateMockData()

@@ -17,7 +17,7 @@ final class RemindersWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .medium
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: RemindersContent
     
@@ -151,55 +151,67 @@ final class RemindersWidget: WidgetContainer, ObservableObject {
     }
     
     private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 20) {
-            // Left side - Pending tasks
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Pending")
+        VStack(spacing: 20) {
+            HStack {
+                Image(systemName: "checklist")
+                    .font(.largeTitle)
+                    .foregroundColor(theme.accentColor)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Reminders")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(theme.textPrimary)
+                    
+                    Text("Task Management Dashboard")
+                        .font(.headline)
+                        .foregroundColor(theme.textSecondary)
+                }
+                
+                Spacer()
+                
+                HStack(spacing: 16) {
+                    priorityBadgeEnhanced(content.highPriorityCount, label: "High Priority", color: .red, theme: theme)
+                    priorityBadgeEnhanced(content.pendingTasks.count, label: "Pending", color: .orange, theme: theme)
+                    priorityBadgeEnhanced(content.completedTasks.count, label: "Completed", color: .green, theme: theme)
+                }
+            }
+            
+            HStack(spacing: 24) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Pending Tasks")
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(theme.textPrimary)
                     
-                    Spacer()
+                    ScrollView {
+                        VStack(spacing: 6) {
+                            ForEach(content.pendingTasks.prefix(8), id: \.id) { task in
+                                self.taskRow(task, theme: theme, compact: false)
+                            }
+                        }
+                    }
+                    .frame(maxHeight: 200)
+                }
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Completed Today")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(theme.textPrimary)
                     
-                    priorityBadge(content.highPriorityCount, color: .red, theme: theme)
-                }
-                
-                VStack(spacing: 6) {
-                    ForEach(content.pendingTasks, id: \.id) { task in
-                        self.taskRow(task, theme: theme, compact: false)
+                    ScrollView {
+                        VStack(spacing: 6) {
+                            ForEach(content.completedTasks.prefix(5), id: \.id) { task in
+                                self.taskRow(task, theme: theme, compact: false, showCompleted: true)
+                            }
+                        }
                     }
-                }
-                
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-            
-            Divider()
-                .frame(height: 120)
-            
-            // Right side - Completed tasks
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Completed Today")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(theme.textPrimary)
-                
-                VStack(spacing: 6) {
-                    ForEach(Array(content.completedTasks.prefix(8)), id: \.id) { task in
-                        self.taskRow(task, theme: theme, compact: true, showCompleted: true)
-                    }
-                }
-                
-                Spacer()
-                
-                if let lastUpdated = content.lastUpdated {
-                    Text("Updated: \(formatTime(lastUpdated))")
-                        .font(.caption)
-                        .foregroundColor(theme.textSecondary)
+                    .frame(maxHeight: 150)
                 }
             }
-            .frame(maxWidth: .infinity)
+            
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -264,6 +276,23 @@ final class RemindersWidget: WidgetContainer, ObservableObject {
         case .low:
             EmptyView()
         }
+    }
+    
+    @ViewBuilder
+    private func priorityBadgeEnhanced(_ count: Int, label: String, color: Color, theme: any Theme) -> some View {
+        VStack(spacing: 4) {
+            Text("\(count)")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(color)
+            
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(theme.textSecondary)
+                .lineLimit(1)
+        }
+        .padding(8)
+        .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
     }
     
     // MARK: - Helper Methods

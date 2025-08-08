@@ -17,7 +17,7 @@ final class SampleWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .medium
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
 
     @Published private var content: SampleContent
 
@@ -158,62 +158,64 @@ final class SampleWidget: WidgetContainer, ObservableObject {
     }
 
     private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 24) {
-            // Left side - Icon and title
-            VStack(spacing: 12) {
+        VStack(spacing: 20) {
+            HStack {
                 Image(systemName: "info.circle")
-                    .font(.system(size: 48))
+                    .font(.largeTitle)
                     .foregroundColor(theme.accentColor)
 
-                Text("Sample Widget")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(theme.textPrimary)
-                    .multilineTextAlignment(.center)
-            }
-            .frame(width: 120)
-
-            // Right side - Detailed content
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Container Architecture Demonstration")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(theme.textPrimary)
-
-                Text(
-                    "This sample widget showcases the flexible container system that powers all Pylon widgets. Each widget is designed as a container where content can be dynamically swapped and resized."
-                )
-                .font(.body)
-                .foregroundColor(theme.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Features:")
-                        .font(.headline)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Sample Widget")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
                         .foregroundColor(theme.textPrimary)
-
-                    bulletPoint("Four size configurations (Small, Medium, Large, XLarge)", theme: theme)
-                    bulletPoint("Automatic theme adaptation with override support", theme: theme)
-                    bulletPoint("Grid-based positioning and alignment", theme: theme)
-                    bulletPoint("Swappable content architecture", theme: theme)
-                    bulletPoint("Drag-and-drop reordering capabilities", theme: theme)
+                    
+                    Text("Extra Large Layout Demonstration")
+                        .font(.headline)
+                        .foregroundColor(theme.textSecondary)
                 }
 
                 Spacer()
+            }
 
-                if let lastUpdated = content.lastUpdated {
-                    HStack {
-                        Spacer()
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text("Last Updated")
-                                .font(.caption)
-                                .foregroundColor(theme.textSecondary)
-                            Text(formatDateTime(lastUpdated))
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .foregroundColor(theme.textPrimary)
-                        }
+            HStack(spacing: 24) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Features")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(theme.textPrimary)
+                    
+                    VStack(alignment: .leading, spacing: 6) {
+                        bulletPoint("Dynamic sizing support", theme: theme)
+                        bulletPoint("Container-based architecture", theme: theme)
+                        bulletPoint("Theme adaptation", theme: theme)
+                        bulletPoint("Content swapping", theme: theme)
                     }
+                }
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Capabilities")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(theme.textPrimary)
+                    
+                    VStack(alignment: .leading, spacing: 6) {
+                        bulletPoint("Grid-based positioning", theme: theme)
+                        bulletPoint("Drag & drop reordering", theme: theme)
+                        bulletPoint("Collision detection", theme: theme)
+                        bulletPoint("Layout persistence", theme: theme)
+                    }
+                }
+            }
+
+            Spacer()
+
+            if let lastUpdated = content.lastUpdated {
+                HStack {
+                    Spacer()
+                    Text("Last updated: \(formatDateTime(lastUpdated))")
+                        .font(.body)
+                        .foregroundColor(theme.textSecondary)
                 }
             }
         }

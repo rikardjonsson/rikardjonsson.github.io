@@ -15,13 +15,13 @@ final class ActivityWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .medium
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: ActivityContent
     
     let title = "Activity"
     let category = WidgetCategory.productivity
-    let supportedSizes: [WidgetSize] = [.small, .medium, .large]
+    let supportedSizes: [WidgetSize] = [.small, .medium, .large, .xlarge]
     
     var lastUpdated: Date? { content.lastUpdated }
     var isLoading: Bool { content.isLoading }
@@ -75,7 +75,7 @@ final class ActivityWidget: WidgetContainer, ObservableObject {
                         }
                         Spacer()
                     }
-                case .large, .xlarge:
+                case .large:
                     VStack(spacing: 12) {
                         HStack {
                             Image(systemName: "figure.walk")
@@ -93,6 +93,45 @@ final class ActivityWidget: WidgetContainer, ObservableObject {
                             activityRowDetailed("Calories", value: "\(content.calories)", goal: "2,000", progress: content.caloriesProgress, color: .red, theme: theme)
                             activityRowDetailed("Exercise", value: "\(content.exerciseMinutes) min", goal: "30 min", progress: content.exerciseProgress, color: .green, theme: theme)
                         }
+                        Spacer()
+                    }
+                case .xlarge:
+                    VStack(spacing: 16) {
+                        // Header with larger title and date
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Image(systemName: "figure.walk")
+                                        .font(.largeTitle)
+                                        .foregroundColor(theme.accentColor)
+                                    Text("Activity Dashboard")
+                                        .font(.largeTitle)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(theme.textPrimary)
+                                }
+                                Text("Today • \(formatDate(Date()))")
+                                    .font(.subheadline)
+                                    .foregroundColor(theme.textSecondary)
+                            }
+                            Spacer()
+                        }
+                        
+                        // Main activity metrics with large progress circles
+                        HStack(spacing: 20) {
+                            activityCircle("Steps", value: "\(content.steps)", goal: "10,000", progress: content.stepsProgress, color: .blue, theme: theme)
+                            activityCircle("Calories", value: "\(content.calories)", goal: "2,000", progress: content.caloriesProgress, color: .red, theme: theme)
+                            activityCircle("Exercise", value: "\(content.exerciseMinutes)", goal: "30", progress: content.exerciseProgress, color: .green, theme: theme)
+                        }
+                        
+                        Spacer()
+                        
+                        // Bottom stats row with additional metrics
+                        HStack(spacing: 30) {
+                            statBox("Average", value: "\(Int(Double(content.steps) * 0.7))", unit: "steps/day", theme: theme)
+                            statBox("Streak", value: "12", unit: "days", theme: theme)
+                            statBox("This Week", value: "\(content.exerciseMinutes * 7)", unit: "minutes", theme: theme)
+                        }
+                        
                         Spacer()
                     }
                 }
@@ -135,6 +174,53 @@ final class ActivityWidget: WidgetContainer, ObservableObject {
                 .progressViewStyle(LinearProgressViewStyle(tint: color))
                 .scaleEffect(y: 0.8)
         }
+    }
+    
+    private func activityCircle(_ label: String, value: String, goal: String, progress: Double, color: Color, theme: any Theme) -> some View {
+        VStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .stroke(color.opacity(0.2), lineWidth: 8)
+                    .frame(width: 80, height: 80)
+                
+                Circle()
+                    .trim(from: 0, to: progress)
+                    .stroke(color, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .frame(width: 80, height: 80)
+                
+                VStack(spacing: 2) {
+                    Text(value)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(theme.textPrimary)
+                    Text(label)
+                        .font(.caption2)
+                        .foregroundColor(theme.textSecondary)
+                }
+            }
+        }
+    }
+    
+    private func statBox(_ label: String, value: String, unit: String, theme: any Theme) -> some View {
+        VStack(spacing: 4) {
+            Text(value)
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(theme.textPrimary)
+            Text(unit)
+                .font(.caption)
+                .foregroundColor(theme.textSecondary)
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(theme.textSecondary)
+        }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
+        return formatter.string(from: date)
     }
 }
 

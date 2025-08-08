@@ -133,6 +133,11 @@ class GridManager: ObservableObject {
         print("✅ Removed all widgets from grid")
     }
     
+    /// Clear the grid completely (alias for removeAllWidgets)
+    func clearGrid() {
+        removeAllWidgets()
+    }
+    
     // MARK: - Layout Operations
     
     /// Optimize the current layout

@@ -137,9 +137,7 @@ struct NativeContentView: View {
     // MARK: - Native Widget Grid
     
     private var nativeWidgetGrid: some View {
-        GridContainerView(
-            configuration: .standard,
-            theme: nativeTheme,
+        TetrisGrid(
             widgets: convertToGridWidgets(appState.widgetManager.enabledContainers())
         )
         .frame(maxWidth: .infinity, minHeight: 600)

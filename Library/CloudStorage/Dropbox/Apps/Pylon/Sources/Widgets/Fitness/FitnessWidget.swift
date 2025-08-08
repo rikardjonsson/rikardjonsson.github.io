@@ -17,7 +17,7 @@ final class FitnessWidget: WidgetContainer, ObservableObject {
     @Published var size: WidgetSize = .large
     @Published var theme: WidgetThemeOverride?
     @Published var isEnabled: Bool = true
-    @Published var position: GridPosition = .zero
+    @Published var gridPosition: GridCell = GridCell(row: 0, column: 0)
     
     @Published private var content: FitnessContent
     
@@ -25,7 +25,7 @@ final class FitnessWidget: WidgetContainer, ObservableObject {
     
     let title = "Fitness"
     let category = WidgetCategory.productivity
-    let supportedSizes: [WidgetSize] = [.medium, .large, .xlarge]
+    let supportedSizes: [WidgetSize] = [.small, .medium, .large, .xlarge]
     
     // Proxy content properties
     var lastUpdated: Date? { content.lastUpdated }
@@ -59,7 +59,7 @@ final class FitnessWidget: WidgetContainer, ObservableObject {
                 case .large:
                     largeLayout(theme: theme)
                 case .xlarge:
-                    xlargeLayout(theme: theme)
+                    largeLayout(theme: theme) // Use large layout for xlarge
                 }
             }
         )
@@ -138,84 +138,6 @@ final class FitnessWidget: WidgetContainer, ObservableObject {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
-    private func xlargeLayout(theme: any Theme) -> some View {
-        HStack(spacing: 20) {
-            // Left side - Today's activities
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Today")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(theme.textPrimary)
-                    
-                    Spacer()
-                    
-                    activeIndicator(theme: theme)
-                }
-                
-                VStack(spacing: 12) {
-                    activityRingDetailed("Steps", current: content.todayStats.steps, goal: content.goals.steps, 
-                                       unit: "steps", color: .blue, theme: theme)
-                    activityRingDetailed("Calories", current: content.todayStats.calories, goal: content.goals.calories, 
-                                       unit: "cal", color: .red, theme: theme)
-                    activityRingDetailed("Exercise", current: content.todayStats.exerciseMinutes, goal: content.goals.exerciseMinutes, 
-                                       unit: "min", color: .green, theme: theme)
-                    activityRingDetailed("Distance", current: Int(content.todayStats.distance), goal: Int(content.goals.distance), 
-                                       unit: "km", color: .purple, theme: theme)
-                }
-                
-                if content.todayStats.workouts > 0 {
-                    workoutSummary(theme: theme)
-                }
-                
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-            
-            Divider()
-                .frame(height: 160)
-            
-            // Right side - Health metrics & trends
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Health")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(theme.textPrimary)
-                
-                VStack(spacing: 10) {
-                    healthMetric("Heart Rate", value: "\(content.healthMetrics.restingHeartRate) bpm", 
-                               status: "Resting", color: .red, theme: theme)
-                    healthMetric("Sleep", value: String(format: "%.1fh", content.healthMetrics.sleepHours), 
-                               status: "Last Night", color: .indigo, theme: theme)
-                    healthMetric("Weight", value: String(format: "%.1f kg", content.healthMetrics.weight), 
-                               status: "Latest", color: .orange, theme: theme)
-                    healthMetric("Hydration", value: String(format: "%.1fL", content.healthMetrics.waterIntake), 
-                               status: "Today", color: .cyan, theme: theme)
-                }
-                
-                Divider()
-                
-                VStack(spacing: 6) {
-                    Text("Weekly Trend")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(theme.textPrimary)
-                    
-                    weeklyTrend(theme: theme)
-                }
-                
-                Spacer()
-                
-                if let lastUpdated = content.lastUpdated {
-                    Text("Updated: \(formatTime(lastUpdated))")
-                        .font(.caption)
-                        .foregroundColor(theme.textSecondary)
-                }
-            }
-            .frame(width: 180)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
     
     // MARK: - Helper Views
     
@@ -312,7 +234,7 @@ final class FitnessWidget: WidgetContainer, ObservableObject {
     private func weeklyTrend(theme: any Theme) -> some View {
         HStack(spacing: 4) {
             ForEach(0..<7, id: \.self) { day in
-                let progress = content.weeklyProgress[day]
+                let progress = self.content.weeklyProgress[day]
                 Rectangle()
                     .fill(progress > 0.7 ? Color.green : (progress > 0.4 ? Color.orange : Color.gray))
                     .frame(height: CGFloat(progress * 20 + 4))

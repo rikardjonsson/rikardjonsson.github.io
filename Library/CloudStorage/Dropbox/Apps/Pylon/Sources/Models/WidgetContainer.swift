@@ -8,6 +8,9 @@
 
 import SwiftUI
 
+// Temporary bridge to new grid system
+typealias GridCell = GridPosition
+
 /// Protocol defining the container architecture for all Pylon widgets
 /// Widgets are designed as containers where content can be swapped dynamically
 @MainActor
@@ -16,7 +19,7 @@ protocol WidgetContainer: Identifiable {
     var size: WidgetSize { get set }
     var theme: WidgetThemeOverride? { get set }
     var isEnabled: Bool { get set }
-    var position: GridPosition { get set }
+    var gridPosition: GridCell { get set }
 
     /// Widget metadata
     var title: String { get }
@@ -71,14 +74,6 @@ enum WidgetCategory: String, CaseIterable, Sendable {
         case .entertainment: "play.circle"
         }
     }
-}
-
-/// Grid position for widget layout
-struct GridPosition: Sendable, Codable, Equatable {
-    let x: Int
-    let y: Int
-
-    static let zero = GridPosition(x: 0, y: 0)
 }
 
 /// Theme overrides specific to a widget
