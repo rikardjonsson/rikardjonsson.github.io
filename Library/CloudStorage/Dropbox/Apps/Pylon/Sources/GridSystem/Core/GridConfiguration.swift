@@ -99,7 +99,7 @@ extension GridConfiguration {
         guard let basePosition = gridPosition(from: point) else { return nil }
         
         // Calculate the center of the detected cell
-        let cellCenter = centerPosition(for: basePosition, size: .small)
+        let _ = centerPosition(for: basePosition, size: .small)
         
         // If point is within cell boundaries, return the position
         let cellBounds = CGRect(

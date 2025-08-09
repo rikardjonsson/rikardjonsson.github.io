@@ -516,6 +516,7 @@ private struct WidgetView: View {
         
         let title: String
         let category: GridWidgetCategory
+        let type: String
         let lastUpdated: Date? = Date()
         let isLoading = false
         let error: (any Error)? = nil
@@ -532,10 +533,10 @@ private struct WidgetView: View {
     }
     
     let sampleWidgets: [any GridWidget] = [
-        SampleGridWidget(size: .small, title: "Clock", category: .productivity),
-        SampleGridWidget(size: .medium, title: "Weather", category: .information),
-        SampleGridWidget(size: .large, title: "Calendar", category: .productivity),
-        SampleGridWidget(size: .small, title: "Stocks", category: .information)
+        SampleGridWidget(size: .small, title: "Clock", category: .productivity, type: "clock"),
+        SampleGridWidget(size: .medium, title: "Weather", category: .information, type: "weather"),
+        SampleGridWidget(size: .large, title: "Calendar", category: .productivity, type: "calendar"),
+        SampleGridWidget(size: .small, title: "Stocks", category: .information, type: "stocks")
     ]
     
     return TetrisGrid(widgets: sampleWidgets)

@@ -60,8 +60,20 @@ enum DebugLog {
         }
     }
     
+    /// Log informational messages
+    static func info(_ message: String) {
+        if !DebugConfig.showCriticalOnly {
+            print("ℹ️ \(message)")
+        }
+    }
+    
     /// Log errors (always shown)
     static func error(_ message: String) {
         print("❌ \(message)")
+    }
+    
+    /// Log warnings (always shown)
+    static func warning(_ message: String) {
+        print("⚠️ \(message)")
     }
 }

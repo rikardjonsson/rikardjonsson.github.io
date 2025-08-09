@@ -23,6 +23,9 @@ protocol GridWidget: Identifiable, Sendable {
     /// Display name for the widget
     var title: String { get }
     
+    /// Widget type identifier for factory creation
+    var type: String { get }
+    
     /// Widget category for organization
     var category: GridWidgetCategory { get }
     

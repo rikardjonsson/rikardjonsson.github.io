@@ -14,11 +14,23 @@ import Combine
 class AppState: ObservableObject {
     @Published var selectedThemeType: ThemeType = .nativeMacOS
     @Published var isKeyboardNavigationEnabled = true
-    @Published var widgetLayout: WidgetLayout = .grid(columns: 3)
+    @Published var layoutConfiguration: LayoutConfiguration = .grid3Column
     @Published var isRefreshing = false
 
     var selectedTheme: any Theme {
         selectedThemeType.theme
+    }
+    
+    // Legacy support for existing code
+    var widgetLayout: WidgetLayout {
+        switch layoutConfiguration.layoutType {
+        case .grid:
+            .grid(columns: layoutConfiguration.columns ?? 3)
+        case .list:
+            .list
+        case .masonry:
+            .masonry
+        }
     }
 
     @Published var widgetManager = WidgetManager()
@@ -28,17 +40,13 @@ class AppState: ObservableObject {
         // Initialize WidgetManager's grid persistence system
         widgetManager.initializePersistence()
         
-        loadPersistedLayout()
+        loadPersistedState()
         setupInitialWidgets()
         setupAutoSave()
+        setupStatePersistence()
         
-        // Observe widget manager changes
-        widgetManager.objectWillChange.sink { [weak self] in
-            DispatchQueue.main.async {
-                self?.objectWillChange.send()
-            }
-        }
-        .store(in: &cancellables)
+        // Remove circular reference that can cause AttributeGraph crashes
+        // The @Published widgetManager will automatically notify views of changes
     }
     
     private var cancellables = Set<AnyCancellable>()
@@ -95,7 +103,9 @@ class AppState: ObservableObject {
         isRefreshing = true
         defer { isRefreshing = false }
 
+        DebugLog.info("Starting refresh of all widgets...")
         await widgetManager.refreshAllContainers()
+        DebugLog.info("Widget refresh cycle completed")
     }
 
     func toggleTheme() {
@@ -113,18 +123,82 @@ class AppState: ObservableObject {
         case .system:
             selectedThemeType = .nativeMacOS
         }
+        
+        // Save theme immediately when changed
+        layoutPersistence.saveTheme(selectedThemeType)
     }
     
-    // MARK: - Layout Persistence
+    // MARK: - State Persistence
     
-    private func loadPersistedLayout() {
-        let (_, gridConfig) = layoutPersistence.loadLayout()
+    private func loadPersistedState() {
+        // Load persisted app state (theme, layout, settings)
+        if let savedAppState = layoutPersistence.loadAppState() {
+            selectedThemeType = savedAppState.selectedThemeType
+            isKeyboardNavigationEnabled = savedAppState.isKeyboardNavigationEnabled
+            
+            // Convert legacy WidgetLayout to new LayoutConfiguration
+            layoutConfiguration = LayoutConfiguration(from: savedAppState.widgetLayout)
+            
+            DebugLog.success("Loaded persisted app state")
+        } else {
+            // Fallback to individual theme loading for backward compatibility
+            selectedThemeType = layoutPersistence.loadTheme()
+            DebugLog.info("Using default app state with persisted theme")
+        }
         
-        // Apply grid configuration
-        widgetManager.gridConfiguration = gridConfig
+        // Load widget layout data - legacy grid config will be merged with layout config
+        let (_, legacyGridConfig) = layoutPersistence.loadLayout()
         
-        // Layout data will be used to restore widgets when they're registered
-        // Store it for later use in setupInitialWidgets
+        // Merge legacy grid configuration with layout configuration
+        if legacyGridConfig.columns != 8 || legacyGridConfig.gridUnit != 100 { // Non-default values
+            layoutConfiguration = LayoutConfiguration(
+                layoutType: layoutConfiguration.layoutType,
+                gridUnit: legacyGridConfig.gridUnit,
+                spacing: legacyGridConfig.spacing,
+                padding: legacyGridConfig.padding,
+                columns: layoutConfiguration.layoutType == .grid ? legacyGridConfig.columns : nil
+            )
+        }
+        
+        // Apply unified configuration to WidgetManager
+        widgetManager.gridConfiguration = layoutConfiguration.legacyGridConfiguration
+        
+        DebugLog.success("Layout configuration applied: \(layoutConfiguration.displayName)")
+    }
+    
+    private func setupStatePersistence() {
+        // Auto-save app state when key properties change
+        $selectedThemeType
+            .sink { [weak self] _ in
+                self?.saveAppState()
+            }
+            .store(in: &cancellables)
+            
+        $layoutConfiguration
+            .sink { [weak self] _ in
+                self?.saveAppState()
+                self?.updateWidgetManagerConfiguration()
+            }
+            .store(in: &cancellables)
+            
+        $isKeyboardNavigationEnabled
+            .sink { [weak self] _ in
+                self?.saveAppState()
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func updateWidgetManagerConfiguration() {
+        widgetManager.gridConfiguration = layoutConfiguration.legacyGridConfiguration
+        DebugLog.info("Updated widget manager with layout: \(layoutConfiguration.displayName)")
+    }
+    
+    private func saveAppState() {
+        layoutPersistence.saveAppState(
+            themeType: selectedThemeType,
+            widgetLayout: widgetLayout, // Use legacy property for backward compatibility
+            isKeyboardNavigationEnabled: isKeyboardNavigationEnabled
+        )
     }
     
     private func setupAutoSave() {
@@ -133,11 +207,32 @@ class AppState: ObservableObject {
     
     func saveLayout() {
         layoutPersistence.saveLayout(widgetManager.containers, gridConfig: widgetManager.gridConfiguration)
+        saveAppState() // Also save current app state
     }
     
     func clearLayout() {
         layoutPersistence.clearLayout()
         widgetManager.removeAllContainers()
+        
+        // Reset to default values
+        selectedThemeType = .nativeMacOS
+        layoutConfiguration = .grid3Column
+        isKeyboardNavigationEnabled = true
+        saveAppState()
+    }
+    
+    // MARK: - Layout Management
+    
+    func setLayoutConfiguration(_ configuration: LayoutConfiguration) {
+        layoutConfiguration = configuration
+        // saveAppState() is called automatically via the publisher
+    }
+    
+    func toggleLayoutMode() {
+        let allConfigs = LayoutConfiguration.allCases
+        let currentIndex = allConfigs.firstIndex(of: layoutConfiguration) ?? 0
+        let nextIndex = (currentIndex + 1) % allConfigs.count
+        setLayoutConfiguration(allConfigs[nextIndex])
     }
     
     // MARK: - Widget Creation Methods
@@ -182,7 +277,74 @@ class AppState: ObservableObject {
 
 // MARK: - Supporting Types
 
-enum WidgetLayout: Equatable, CaseIterable, Sendable {
+// MARK: - Unified Layout Configuration
+
+struct LayoutConfiguration: Equatable, Sendable, Codable {
+    let layoutType: LayoutType
+    let gridUnit: CGFloat
+    let spacing: CGFloat
+    let padding: EdgeInsets
+    
+    // Grid-specific properties
+    let columns: Int?
+    
+    init(
+        layoutType: LayoutType,
+        gridUnit: CGFloat = 100,
+        spacing: CGFloat = 4,
+        padding: EdgeInsets = LayoutConfiguration.defaultPadding,
+        columns: Int? = nil
+    ) {
+        self.layoutType = layoutType
+        self.gridUnit = gridUnit
+        self.spacing = spacing
+        self.padding = padding
+        self.columns = columns
+    }
+    
+    // Default padding
+    private static let defaultPadding = EdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
+    
+    // Preset configurations
+    static let grid2Column = LayoutConfiguration(layoutType: .grid, columns: 2)
+    static let grid3Column = LayoutConfiguration(layoutType: .grid, columns: 3)
+    static let grid4Column = LayoutConfiguration(layoutType: .grid, columns: 4)
+    static let list = LayoutConfiguration(layoutType: .list)
+    static let masonry = LayoutConfiguration(layoutType: .masonry)
+    
+    static let allCases: [LayoutConfiguration] = [
+        .grid2Column, .grid3Column, .grid4Column, .list, .masonry
+    ]
+    
+    var displayName: String {
+        switch layoutType {
+        case .grid:
+            "Grid (\(columns ?? 3) columns)"
+        case .list:
+            "List"
+        case .masonry:
+            "Masonry"
+        }
+    }
+}
+
+enum LayoutType: String, CaseIterable, Sendable, Codable {
+    case grid
+    case list
+    case masonry
+    
+    var displayName: String {
+        switch self {
+        case .grid: "Grid"
+        case .list: "List"
+        case .masonry: "Masonry"
+        }
+    }
+}
+
+// MARK: - Legacy Support
+
+enum WidgetLayout: Equatable, CaseIterable, Sendable, Codable {
     case grid(columns: Int)
     case list
     case masonry
@@ -206,5 +368,34 @@ enum WidgetLayout: Equatable, CaseIterable, Sendable {
             .list,
             .masonry,
         ]
+    }
+    
+    // Convert to unified configuration
+    var layoutConfiguration: LayoutConfiguration {
+        switch self {
+        case .grid(let columns):
+            LayoutConfiguration(layoutType: .grid, columns: columns)
+        case .list:
+            LayoutConfiguration.list
+        case .masonry:
+            LayoutConfiguration.masonry
+        }
+    }
+}
+
+extension LayoutConfiguration {
+    // Convert from legacy WidgetLayout
+    init(from widgetLayout: WidgetLayout) {
+        self = widgetLayout.layoutConfiguration
+    }
+    
+    // Convert to LegacyGridConfiguration for backward compatibility
+    var legacyGridConfiguration: LegacyGridConfiguration {
+        var config = LegacyGridConfiguration()
+        config.columns = columns ?? 8
+        config.gridUnit = gridUnit
+        config.spacing = spacing
+        config.padding = padding
+        return config
     }
 }

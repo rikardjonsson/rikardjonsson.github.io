@@ -278,9 +278,11 @@ struct TopBarView: View {
     }
     
     private func startMessageRotation() {
-        timer = Timer.scheduledTimer(withTimeInterval: 6.0, repeats: true) { _ in // Even more relaxed
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.85, blendDuration: 0)) { // Spring physics for text
-                currentMessageIndex = (currentMessageIndex + 1) % philosophicalMessages.count
+        timer = Timer.scheduledTimer(withTimeInterval: 6.0, repeats: true) { _ in
+            Task { @MainActor in
+                withAnimation(.spring(response: 0.8, dampingFraction: 0.85, blendDuration: 0)) {
+                    currentMessageIndex = (currentMessageIndex + 1) % philosophicalMessages.count
+                }
             }
         }
     }

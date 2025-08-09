@@ -11,11 +11,25 @@ import SwiftUI
 @main
 struct PylonApp: App {
     @StateObject private var appState = AppState()
+    @State private var showingAbout = false
+    @State private var showingPreferences = false
+    @State private var showingQuickAdd = false
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
+                .sheet(isPresented: $showingAbout) {
+                    AboutWindow()
+                }
+                .sheet(isPresented: $showingPreferences) {
+                    PreferencesWindow()
+                        .environmentObject(appState)
+                }
+                .sheet(isPresented: $showingQuickAdd) {
+                    QuickAddWindow()
+                        .environmentObject(appState)
+                }
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentMinSize) // Allow resizing in both directions
@@ -23,19 +37,19 @@ struct PylonApp: App {
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About Pylon") {
-                    // TODO: Show about window
+                    showingAbout = true
                 }
             }
             CommandGroup(after: .appInfo) {
                 Divider()
                 Button("Preferences...") {
-                    // TODO: Show preferences
+                    showingPreferences = true
                 }
                 .keyboardShortcut(",")
             }
             CommandGroup(after: .newItem) {
                 Button("Quick Add...") {
-                    // TODO: Show quick add
+                    showingQuickAdd = true
                 }
                 .keyboardShortcut("n")
 

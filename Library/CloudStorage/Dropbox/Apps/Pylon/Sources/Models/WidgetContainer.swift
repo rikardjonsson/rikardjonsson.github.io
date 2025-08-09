@@ -14,7 +14,7 @@ typealias GridCell = GridPosition
 /// Protocol defining the container architecture for all Pylon widgets
 /// Widgets are designed as containers where content can be swapped dynamically
 @MainActor
-protocol WidgetContainer: Identifiable {
+protocol WidgetContainer: Identifiable, Sendable {
     var id: UUID { get }
     var size: WidgetSize { get set }
     var theme: WidgetThemeOverride? { get set }
@@ -49,29 +49,35 @@ protocol WidgetContent: ObservableObject {
 
 /// Widget categories for organization
 enum WidgetCategory: String, CaseIterable, Sendable {
+    case all
     case productivity
     case information
     case system
     case communication
     case entertainment
+    case health
 
     var displayName: String {
         switch self {
+        case .all: "All"
         case .productivity: "Productivity"
         case .information: "Information"
         case .system: "System"
         case .communication: "Communication"
         case .entertainment: "Entertainment"
+        case .health: "Health"
         }
     }
 
     var iconName: String {
         switch self {
+        case .all: "square.grid.3x3"
         case .productivity: "checklist"
         case .information: "info.circle"
         case .system: "cpu"
         case .communication: "message"
         case .entertainment: "play.circle"
+        case .health: "heart"
         }
     }
 }

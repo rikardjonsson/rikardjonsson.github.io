@@ -15,6 +15,7 @@ struct WidgetContainerAdapter: GridWidget {
     var size: GridSize
     var position: GridPosition = .zero
     let title: String
+    let type: String
     let category: GridWidgetCategory
     var isEnabled: Bool = true
     
@@ -30,6 +31,7 @@ struct WidgetContainerAdapter: GridWidget {
         self.originalContainer = container
         self.id = container.id
         self.title = container.title
+        self.type = Self.determineType(for: container)
         
         // Convert size - ensure dimensions match
         switch container.size {
@@ -71,7 +73,7 @@ struct WidgetContainerAdapter: GridWidget {
     
     /// Determine widget category from widget type
     private static func determineCategory(for container: any WidgetContainer) -> GridWidgetCategory {
-        let typeName = String(describing: type(of: container))
+        let typeName = String(describing: Swift.type(of: container))
         
         switch typeName {
         case let name where name.contains("Clock"):
@@ -114,6 +116,54 @@ struct WidgetContainerAdapter: GridWidget {
             return .information
         default:
             return .custom
+        }
+    }
+    
+    /// Determine widget type identifier from widget instance
+    private static func determineType(for container: any WidgetContainer) -> String {
+        let typeName = String(describing: Swift.type(of: container))
+        
+        switch typeName {
+        case let name where name.contains("Clock"):
+            return "clock"
+        case let name where name.contains("Weather"):
+            return "weather"
+        case let name where name.contains("Calendar"):
+            return "calendar"
+        case let name where name.contains("Reminders"):
+            return "reminders"
+        case let name where name.contains("Notes"):
+            return "notes"
+        case let name where name.contains("System"):
+            return "system"
+        case let name where name.contains("Email"):
+            return "email"
+        case let name where name.contains("Finance"):
+            return "finance"
+        case let name where name.contains("Fitness"):
+            return "fitness"
+        case let name where name.contains("Stocks"):
+            return "stocks"
+        case let name where name.contains("Crypto"):
+            return "crypto"
+        case let name where name.contains("News"):
+            return "news"
+        case let name where name.contains("Music"):
+            return "music"
+        case let name where name.contains("Photo"):
+            return "photos"
+        case let name where name.contains("Podcast"):
+            return "podcast"
+        case let name where name.contains("Social"):
+            return "social"
+        case let name where name.contains("Shopping"):
+            return "shopping"
+        case let name where name.contains("Travel"):
+            return "travel"
+        case let name where name.contains("Activity"):
+            return "activity"
+        default:
+            return "unknown"
         }
     }
 }

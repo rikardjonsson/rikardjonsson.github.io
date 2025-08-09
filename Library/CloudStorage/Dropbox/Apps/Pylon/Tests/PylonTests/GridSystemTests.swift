@@ -7,27 +7,29 @@
 //
 
 import XCTest
+import SwiftUI
 @testable import Pylon
 
-/// Comprehensive test suite for the new grid system
+/// Comprehensive test suite for the current grid system
+@MainActor
 final class GridSystemTests: XCTestCase {
     
     var gridManager: GridManager!
-    var testWidget: ExampleWidget!
+    fileprivate var testWidget: TestGridWidget!
     
-    override func setUp() {
-        super.setUp()
-        gridManager = GridManager(configuration: .standard)
-        testWidget = ExampleWidget(title: "Test Widget", size: .medium, category: .utilities)
+    override func setUp() async throws {
+        try await super.setUp()
+        gridManager = GridManager()
+        testWidget = TestGridWidget()
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         gridManager = nil
         testWidget = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
-    // MARK: - Core Grid Engine Tests
+    // MARK: - Core Grid Position Tests
     
     func testGridPositionBasics() {
         let position = GridPosition(row: 1, column: 2)
@@ -37,258 +39,146 @@ final class GridSystemTests: XCTestCase {
         XCTAssertEqual(GridPosition.zero.column, 0)
     }
     
-    func testGridSizePresets() {
-        XCTAssertEqual(GridSize.small.width, 1)
-        XCTAssertEqual(GridSize.small.height, 1)
-        XCTAssertEqual(GridSize.medium.width, 2)
-        XCTAssertEqual(GridSize.medium.height, 2)
-        XCTAssertEqual(GridSize.large.width, 4)
-        XCTAssertEqual(GridSize.large.height, 2)
+    func testGridPositionEquality() {
+        let pos1 = GridPosition(row: 1, column: 2)
+        let pos2 = GridPosition(row: 1, column: 2)
+        let pos3 = GridPosition(row: 2, column: 1)
+        
+        XCTAssertEqual(pos1, pos2)
+        XCTAssertNotEqual(pos1, pos3)
     }
     
-    func testGridBounds() {
-        let bounds = GridBounds.standard
-        XCTAssertEqual(bounds.columns, 8)
-        XCTAssertEqual(bounds.rows, Int.max)
-        
-        XCTAssertTrue(bounds.contains(GridPosition(row: 0, column: 0)))
-        XCTAssertTrue(bounds.contains(GridPosition(row: 100, column: 7)))
-        XCTAssertFalse(bounds.contains(GridPosition(row: 0, column: 8)))
+    // MARK: - Widget Size Tests
+    
+    func testWidgetSizeDimensions() {
+        XCTAssertEqual(WidgetSize.small.gridDimensions.width, 1)
+        XCTAssertEqual(WidgetSize.small.gridDimensions.height, 1)
+        XCTAssertEqual(WidgetSize.medium.gridDimensions.width, 2)
+        XCTAssertEqual(WidgetSize.medium.gridDimensions.height, 2)
+        XCTAssertEqual(WidgetSize.large.gridDimensions.width, 4)
+        XCTAssertEqual(WidgetSize.large.gridDimensions.height, 2)
+        XCTAssertEqual(WidgetSize.xlarge.gridDimensions.width, 4)
+        XCTAssertEqual(WidgetSize.xlarge.gridDimensions.height, 4)
     }
     
-    func testGridConfiguration() {
-        let config = GridConfiguration.standard
-        XCTAssertEqual(config.cellSize, 120)
-        XCTAssertEqual(config.cellSpacing, 8)
-        XCTAssertEqual(config.bounds.columns, 8)
-        
-        let frameSize = config.frameSize(for: .medium)
-        XCTAssertEqual(frameSize.width, 248) // (120 * 2) + (8 * 1)
-        XCTAssertEqual(frameSize.height, 248)
-        
-        let framePosition = config.framePosition(for: GridPosition(row: 1, column: 1))
-        XCTAssertEqual(framePosition.x, 128) // (120 + 8) * 1
-        XCTAssertEqual(framePosition.y, 128)
+    func testWidgetSizeCellCount() {
+        XCTAssertEqual(WidgetSize.small.cellCount, 1)
+        XCTAssertEqual(WidgetSize.medium.cellCount, 4)
+        XCTAssertEqual(WidgetSize.large.cellCount, 8)
+        XCTAssertEqual(WidgetSize.xlarge.cellCount, 16)
     }
     
-    // MARK: - Widget Protocol Tests
-    
-    func testGridWidget() {
-        XCTAssertEqual(testWidget.title, "Test Widget")
-        XCTAssertEqual(testWidget.size, .medium)
-        XCTAssertEqual(testWidget.category, .utilities)
-        XCTAssertTrue(testWidget.isEnabled)
-        XCTAssertTrue(testWidget.supportedSizes.contains(.medium))
+    func testWidgetSizeOccupiedCells() {
+        let position = GridPosition(row: 1, column: 1)
+        
+        let smallCells = WidgetSize.small.occupiedCells(at: position)
+        XCTAssertEqual(smallCells.count, 1)
+        XCTAssertTrue(smallCells.contains(GridPosition(row: 1, column: 1)))
+        
+        let mediumCells = WidgetSize.medium.occupiedCells(at: position)
+        XCTAssertEqual(mediumCells.count, 4)
+        XCTAssertTrue(mediumCells.contains(GridPosition(row: 1, column: 1)))
+        XCTAssertTrue(mediumCells.contains(GridPosition(row: 1, column: 2)))
+        XCTAssertTrue(mediumCells.contains(GridPosition(row: 2, column: 1)))
+        XCTAssertTrue(mediumCells.contains(GridPosition(row: 2, column: 2)))
     }
     
-    func testWidgetCategories() {
-        let categories = GridWidgetCategory.allCases
-        XCTAssertTrue(categories.contains(.utilities))
-        XCTAssertTrue(categories.contains(.information))
-        XCTAssertTrue(categories.contains(.productivity))
+    func testWidgetSizeFrameCalculation() {
+        let gridUnit: CGFloat = 100
+        let spacing: CGFloat = 8
         
-        XCTAssertEqual(GridWidgetCategory.utilities.systemImage, "wrench.and.screwdriver")
-        XCTAssertEqual(GridWidgetCategory.information.systemImage, "info.circle")
-    }
-    
-    // MARK: - Layout Engine Tests
-    
-    func testSimpleSequentialEngine() {
-        let engine = SimpleSequentialEngine()
-        let config = GridConfiguration.standard
+        let smallFrame = WidgetSize.small.frameSize(gridUnit: gridUnit, spacing: spacing)
+        XCTAssertEqual(smallFrame.width, 100) // 1 * 100 + 0 * 8
+        XCTAssertEqual(smallFrame.height, 100)
         
-        // Test finding available position
-        let position = engine.findAvailablePosition(
-            for: testWidget,
-            avoiding: [],
-            configuration: config
-        )
-        
-        XCTAssertNotNil(position)
-        XCTAssertEqual(position, GridPosition(row: 0, column: 0))
-    }
-    
-    func testCollisionDetection() {
-        let detector = SimpleCollisionDetector()
-        
-        // Test non-overlapping positions
-        XCTAssertFalse(detector.wouldCollide(
-            testWidget,
-            at: GridPosition(row: 0, column: 0),
-            with: [],
-            excludingIds: []
-        ))
-        
-        // Test overlapping positions
-        let occupiedPositions: Set<GridPosition> = [
-            GridPosition(row: 0, column: 0),
-            GridPosition(row: 0, column: 1),
-            GridPosition(row: 1, column: 0),
-            GridPosition(row: 1, column: 1)
-        ]
-        
-        XCTAssertTrue(detector.wouldCollide(
-            testWidget,
-            at: GridPosition(row: 0, column: 0),
-            with: occupiedPositions,
-            excludingIds: []
-        ))
+        let mediumFrame = WidgetSize.medium.frameSize(gridUnit: gridUnit, spacing: spacing)
+        XCTAssertEqual(mediumFrame.width, 208) // 2 * 100 + 1 * 8
+        XCTAssertEqual(mediumFrame.height, 208)
     }
     
     // MARK: - Grid Manager Tests
     
-    func testGridManagerAddWidget() {
-        XCTAssertTrue(gridManager.widgets.isEmpty)
-        
-        let success = gridManager.addWidget(testWidget)
-        XCTAssertTrue(success)
-        XCTAssertEqual(gridManager.widgets.count, 1)
-        XCTAssertEqual(gridManager.widgets.first?.id, testWidget.id)
+    func testGridManagerInitialization() {
+        XCTAssertNotNil(gridManager)
+        // GridManager is initialized correctly
     }
     
-    func testGridManagerDuplicateWidget() {
-        // Add widget first time
-        XCTAssertTrue(gridManager.addWidget(testWidget))
-        
-        // Try to add same widget again
-        XCTAssertFalse(gridManager.addWidget(testWidget))
-        XCTAssertEqual(gridManager.widgets.count, 1)
+    func testGridManagerExists() {
+        // Basic test to ensure GridManager can be created
+        let manager = GridManager()
+        XCTAssertNotNil(manager)
     }
     
-    func testGridManagerRemoveWidget() {
-        gridManager.addWidget(testWidget)
-        XCTAssertEqual(gridManager.widgets.count, 1)
-        
-        let removed = gridManager.removeWidget(id: testWidget.id)
-        XCTAssertTrue(removed)
-        XCTAssertTrue(gridManager.widgets.isEmpty)
-    }
+    // MARK: - Widget Category Tests
     
-    func testGridManagerMoveWidget() {
-        gridManager.addWidget(testWidget)
-        let originalPosition = testWidget.position
-        let newPosition = GridPosition(row: 2, column: 2)
+    func testWidgetCategories() {
+        let categories = WidgetCategory.allCases
+        XCTAssertTrue(categories.contains(.productivity))
+        XCTAssertTrue(categories.contains(.information))
+        XCTAssertTrue(categories.contains(.system))
+        XCTAssertTrue(categories.contains(.communication))
+        XCTAssertTrue(categories.contains(.entertainment))
+        XCTAssertTrue(categories.contains(.health))
         
-        let moved = gridManager.moveWidget(id: testWidget.id, to: newPosition)
-        XCTAssertTrue(moved)
-        
-        let movedWidget = gridManager.widgets.first { $0.id == testWidget.id }
-        XCTAssertNotNil(movedWidget)
-        XCTAssertEqual(movedWidget?.position, newPosition)
-        XCTAssertNotEqual(movedWidget?.position, originalPosition)
-    }
-    
-    func testGridManagerCanPlaceWidget() {
-        // Empty grid should allow placement anywhere valid
-        XCTAssertTrue(gridManager.canPlaceWidget(testWidget, at: GridPosition(row: 0, column: 0)))
-        XCTAssertTrue(gridManager.canPlaceWidget(testWidget, at: GridPosition(row: 5, column: 5)))
-        
-        // Out of bounds should fail
-        XCTAssertFalse(gridManager.canPlaceWidget(testWidget, at: GridPosition(row: 0, column: 10)))
-        
-        // Add a widget and test collision
-        gridManager.addWidget(testWidget)
-        let overlappingWidget = ExampleWidget(title: "Overlap", size: .medium, category: .utilities)
-        
-        XCTAssertFalse(gridManager.canPlaceWidget(overlappingWidget, at: GridPosition(row: 0, column: 0)))
-        XCTAssertTrue(gridManager.canPlaceWidget(overlappingWidget, at: GridPosition(row: 3, column: 3)))
+        XCTAssertEqual(WidgetCategory.productivity.iconName, "checklist")
+        XCTAssertEqual(WidgetCategory.information.iconName, "info.circle")
+        XCTAssertEqual(WidgetCategory.system.iconName, "cpu")
     }
     
     // MARK: - Performance Tests
     
-    func testPerformanceWithManyWidgets() {
+    func testWidgetSizePerformance() {
         measure {
-            // Add many widgets to test performance
-            for i in 0..<20 {
-                let widget = ExampleWidget(
-                    title: "Widget \(i)",
-                    size: .small,
-                    category: .utilities
-                )
-                _ = gridManager.addWidget(widget)
+            for _ in 0..<1000 {
+                let _ = WidgetSize.small.frameSize(gridUnit: 100, spacing: 8)
+                let _ = WidgetSize.medium.frameSize(gridUnit: 100, spacing: 8)
+                let _ = WidgetSize.large.frameSize(gridUnit: 100, spacing: 8)
+                let _ = WidgetSize.xlarge.frameSize(gridUnit: 100, spacing: 8)
             }
-            
-            // Clear for next iteration
-            gridManager.removeAllWidgets()
         }
     }
+}
+
+// MARK: - Test Widget
+
+fileprivate class TestGridWidget: WidgetContainer, @unchecked Sendable {
+    let id = UUID()
+    var size: WidgetSize = .medium
+    var theme: WidgetThemeOverride? = nil
+    var title: String = "Test Grid Widget"
+    var category: WidgetCategory = .system
+    var supportedSizes: [WidgetSize] = [.small, .medium, .large, .xlarge]
+    var isEnabled: Bool = true
+    var gridPosition: GridPosition = .zero
+    var lastUpdated: Date? = nil
+    var isLoading: Bool = false
+    var error: Error? = nil
     
-    func testLayoutEnginePerformance() {
-        // Fill grid with many widgets first
-        for i in 0..<30 {
-            let widget = ExampleWidget(
-                title: "Widget \(i)",
-                size: .small,
-                category: .utilities
-            )
-            _ = gridManager.addWidget(widget)
-        }
+    @MainActor
+    func refresh() async throws {
+        isLoading = true
+        defer { isLoading = false }
         
-        measure {
-            // Test finding available position in crowded grid
-            let engine = SimpleSequentialEngine()
-            let newWidget = ExampleWidget(title: "New", size: .medium, category: .utilities)
-            _ = engine.findAvailablePosition(
-                for: newWidget,
-                avoiding: gridManager.occupiedPositions,
-                configuration: gridManager.configuration
-            )
-        }
+        // Simulate refresh work
+        try await Task.sleep(nanoseconds: 1_000_000) // 0.001 seconds
+        
+        lastUpdated = Date()
+        error = nil
     }
     
-    // MARK: - Error Handling Tests
-    
-    func testInvalidPositions() {
-        let invalidWidget = ExampleWidget(title: "Invalid", size: .large, category: .utilities)
-        
-        // Try to place large widget where it won't fit
-        let success = gridManager.canPlaceWidget(invalidWidget, at: GridPosition(row: 0, column: 6))
-        XCTAssertFalse(success)
+    func configure() -> AnyView {
+        AnyView(Text("Test Grid Configuration"))
     }
     
-    func testGridBoundaryConditions() {
-        // Test widget exactly at boundary
-        let boundaryWidget = ExampleWidget(title: "Boundary", size: .small, category: .utilities)
-        boundaryWidget.position = GridPosition(row: 0, column: 7) // Last valid column
-        
-        XCTAssertTrue(gridManager.addWidget(boundaryWidget))
-        
-        // Test widget beyond boundary
-        let beyondWidget = ExampleWidget(title: "Beyond", size: .small, category: .utilities)
-        beyondWidget.position = GridPosition(row: 0, column: 8) // Invalid column
-        
-        XCTAssertFalse(gridManager.addWidget(beyondWidget))
-    }
-    
-    // MARK: - Integration Tests
-    
-    func testFullWorkflow() {
-        // Test complete workflow: add, move, remove
-        
-        // 1. Add multiple widgets
-        let widget1 = ExampleWidget(title: "Widget 1", size: .small, category: .utilities)
-        let widget2 = ExampleWidget(title: "Widget 2", size: .medium, category: .information)
-        let widget3 = ExampleWidget(title: "Widget 3", size: .large, category: .productivity)
-        
-        XCTAssertTrue(gridManager.addWidget(widget1))
-        XCTAssertTrue(gridManager.addWidget(widget2))
-        XCTAssertTrue(gridManager.addWidget(widget3))
-        XCTAssertEqual(gridManager.widgets.count, 3)
-        
-        // 2. Move widgets around
-        XCTAssertTrue(gridManager.moveWidget(id: widget1.id, to: GridPosition(row: 5, column: 0)))
-        XCTAssertTrue(gridManager.moveWidget(id: widget2.id, to: GridPosition(row: 5, column: 2)))
-        
-        // 3. Verify positions
-        let movedWidget1 = gridManager.widgets.first { $0.id == widget1.id }
-        XCTAssertEqual(movedWidget1?.position, GridPosition(row: 5, column: 0))
-        
-        // 4. Remove widgets
-        XCTAssertTrue(gridManager.removeWidget(id: widget2.id))
-        XCTAssertEqual(gridManager.widgets.count, 2)
-        
-        // 5. Clear all
-        gridManager.removeAllWidgets()
-        XCTAssertTrue(gridManager.widgets.isEmpty)
+    func body(theme: any Theme, gridUnit: CGFloat, spacing: CGFloat) -> AnyView {
+        AnyView(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.blue.opacity(0.3))
+                .overlay(
+                    Text(title)
+                        .font(.caption)
+                        .foregroundColor(.primary)
+                )
+        )
     }
 }

@@ -103,41 +103,46 @@ struct DropZoneIndicator: View {
 
 /// Enhanced drag gesture with haptic feedback
 struct EnhancedDragGesture {
+    @MainActor
     static func create<V: View>(
         for widget: any GridWidget,
         in gridManager: GridManager,
-        onDragChanged: @escaping (any GridWidget, DragGesture.Value) -> Void,
-        onDragEnded: @escaping (any GridWidget, DragGesture.Value) -> Void
+        onDragChanged: @escaping @MainActor (any GridWidget, DragGesture.Value) -> Void,
+        onDragEnded: @escaping @MainActor (any GridWidget, DragGesture.Value) -> Void
     ) -> some Gesture {
         DragGesture(coordinateSpace: .named("GridContainer"))
             .onChanged { value in
-                onDragChanged(widget, value)
-                
-                // Haptic feedback for grid alignment
-                if let targetPosition = gridManager.gridPosition(from: value.location) {
-                    let isValid = gridManager.canPlaceWidget(widget, at: targetPosition, excluding: [widget.id])
+                Task { @MainActor in
+                    onDragChanged(widget, value)
                     
-                    // Light haptic feedback when entering valid drop zones
-                    #if os(iOS)
-                    let impact = UIImpactFeedbackGenerator(style: .light)
-                    impact.impactOccurred()
-                    #endif
+                    // Haptic feedback for grid alignment
+                    if let targetPosition = gridManager.gridPosition(from: value.location) {
+                        let _ = gridManager.canPlaceWidget(widget, at: targetPosition, excluding: [widget.id])
+                        
+                        // Light haptic feedback when entering valid drop zones
+                        #if os(iOS)
+                        let impact = UIImpactFeedbackGenerator(style: .light)
+                        impact.impactOccurred()
+                        #endif
+                    }
                 }
             }
             .onEnded { value in
-                onDragEnded(widget, value)
-                
-                // Success/failure haptic feedback
-                #if os(iOS)
-                let notification = UINotificationFeedbackGenerator()
-                
-                if let targetPosition = gridManager.gridPosition(from: value.location),
-                   gridManager.canPlaceWidget(widget, at: targetPosition, excluding: [widget.id]) {
-                    notification.notificationOccurred(.success)
-                } else {
-                    notification.notificationOccurred(.error)
+                Task { @MainActor in
+                    onDragEnded(widget, value)
+                    
+                    // Success/failure haptic feedback
+                    #if os(iOS)
+                    let notification = UINotificationFeedbackGenerator()
+                    
+                    if let targetPosition = gridManager.gridPosition(from: value.location),
+                       gridManager.canPlaceWidget(widget, at: targetPosition, excluding: [widget.id]) {
+                        notification.notificationOccurred(.success)
+                    } else {
+                        notification.notificationOccurred(.error)
+                    }
+                    #endif
                 }
-                #endif
             }
     }
 }

@@ -171,7 +171,7 @@ final class CalendarWidget: WidgetContainer, ObservableObject {
                     ScrollView {
                         VStack(spacing: 6) {
                             ForEach(content.todayEvents, id: \.id) { event in
-                                eventCardDetailed(event, theme: theme, isToday: true)
+                                self.eventCardDetailed(event, theme: theme, isToday: true)
                             }
                         }
                     }
@@ -188,7 +188,7 @@ final class CalendarWidget: WidgetContainer, ObservableObject {
                     ScrollView {
                         VStack(spacing: 6) {
                             ForEach(Array(content.upcomingEvents.prefix(8)), id: \.id) { event in
-                                eventCardDetailed(event, theme: theme, isToday: false)
+                                self.eventCardDetailed(event, theme: theme, isToday: false)
                             }
                         }
                     }
@@ -263,7 +263,7 @@ final class CalendarWidget: WidgetContainer, ObservableObject {
             Spacer()
         }
         .padding(8)
-        .background(theme.surfaceSecondary.opacity(0.3))
+        .background(theme.cardBackground.opacity(0.3))
         .cornerRadius(6)
     }
     

@@ -257,7 +257,7 @@ final class WeatherWidget: WidgetContainer, ObservableObject {
                 .foregroundColor(theme.textSecondary)
         }
         .padding(16)
-        .background(theme.surfaceSecondary.opacity(0.3))
+        .background(theme.cardBackground.opacity(0.3))
         .cornerRadius(12)
         .frame(maxWidth: .infinity)
     }

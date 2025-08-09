@@ -103,7 +103,7 @@ final class EmailWidget: WidgetContainer, ObservableObject {
             
             VStack(spacing: 4) {
                 ForEach(Array(content.recentEmails.prefix(3)), id: \.id) { email in
-                    emailRow(email, theme: theme, compact: true)
+                    self.emailRow(email, theme: theme, compact: true)
                 }
             }
             
@@ -136,7 +136,7 @@ final class EmailWidget: WidgetContainer, ObservableObject {
             
             VStack(spacing: 6) {
                 ForEach(Array(content.recentEmails.prefix(6)), id: \.id) { email in
-                    emailRow(email, theme: theme, compact: false)
+                    self.emailRow(email, theme: theme, compact: false)
                 }
             }
             

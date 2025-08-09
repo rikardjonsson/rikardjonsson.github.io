@@ -336,6 +336,8 @@ struct FluidWidgetContainer: View {
             return EdgeInsets(top: basePadding, leading: basePadding, bottom: basePadding, trailing: basePadding)
         case .large:
             return EdgeInsets(top: basePadding * 1.5, leading: basePadding * 1.5, bottom: basePadding * 1.5, trailing: basePadding * 1.5)
+        case .xlarge:
+            return EdgeInsets(top: basePadding * 2.0, leading: basePadding * 2.0, bottom: basePadding * 2.0, trailing: basePadding * 2.0)
         }
     }
     

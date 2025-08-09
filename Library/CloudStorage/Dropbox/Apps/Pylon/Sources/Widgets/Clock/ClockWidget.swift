@@ -205,7 +205,7 @@ final class ClockWidget: WidgetContainer, ObservableObject {
                 .monospacedDigit()
         }
         .padding(12)
-        .background(theme.surfaceSecondary.opacity(0.3))
+        .background(theme.cardBackground.opacity(0.3))
         .cornerRadius(8)
         .frame(maxWidth: .infinity)
     }
@@ -230,16 +230,18 @@ final class ClockContent: WidgetContent, ObservableObject {
     @Published var currentDate: String = ""
     @Published var timezone: String = ""
     
+    @MainActor
     private var timer: Timer?
     
     init() {
         updateTime()
-        startTimer()
+        Task { @MainActor in
+            startTimer()
+        }
     }
     
     deinit {
-        // Note: Timer invalidation in deinit may not work reliably with Swift concurrency
-        // Consider implementing a proper cleanup method instead
+        // Timer cleanup handled by MainActor deallocation
     }
     
     @MainActor
@@ -248,8 +250,10 @@ final class ClockContent: WidgetContent, ObservableObject {
         lastUpdated = Date()
     }
     
+    @MainActor
     private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        // Update every 30 seconds instead of every second to reduce AttributeGraph pressure
+        timer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.updateTime()
             }

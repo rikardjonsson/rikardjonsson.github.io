@@ -58,7 +58,7 @@ struct GridBackground: View {
         ZStack {
             // Subtle grid pattern (only show when dragging)
             if highlightedCell != nil {
-                ForEach(0..<bounds.rows, id: \.self) { row in
+                ForEach(0..<safeRowCount, id: \.self) { row in
                     ForEach(0..<bounds.columns, id: \.self) { column in
                         let cell = GridPosition(row: row, column: column)
                         let isOccupied = occupiedCells.contains(cell)
@@ -80,6 +80,40 @@ struct GridBackground: View {
         .animation(.easeInOut(duration: 0.2), value: highlightedCell != nil)
     }
     
+    // MARK: - Safe Row Count
+    
+    /// Calculate a safe number of rows to render (prevents infinite expansion)
+    private var safeRowCount: Int {
+        if bounds.isUnlimited {
+            // For unlimited grids, only render rows that are needed based on:
+            // 1. Currently occupied cells
+            // 2. Highlighted cell (if any)
+            // 3. A reasonable buffer of empty rows for drag operations
+            
+            var maxNeededRow = 0
+            
+            // Check occupied cells
+            if !occupiedCells.isEmpty {
+                maxNeededRow = max(maxNeededRow, occupiedCells.map(\.row).max() ?? 0)
+            }
+            
+            // Check highlighted cell
+            if let highlighted = highlightedCell {
+                maxNeededRow = max(maxNeededRow, highlighted.row)
+            }
+            
+            // Add buffer and cap at reasonable maximum
+            let bufferRows = 5
+            let reasonableMaxRows = 50 // Prevent rendering excessive rows
+            let result = min(maxNeededRow + bufferRows, reasonableMaxRows)
+            
+            DebugLog.grid("GridBackground: Safe row calculation - maxNeeded: \(maxNeededRow), result: \(result)")
+            return result
+        } else {
+            return bounds.rows
+        }
+    }
+    
     // MARK: - Layout Calculations
     
     /// Calculate the position for a grid cell
@@ -97,7 +131,7 @@ struct GridBackground: View {
     
     /// Total height of the grid
     private var gridHeight: CGFloat {
-        CGFloat(bounds.rows) * cellSize + CGFloat(bounds.rows - 1) * spacing
+        CGFloat(safeRowCount) * cellSize + CGFloat(max(0, safeRowCount - 1)) * spacing
     }
 }
 

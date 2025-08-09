@@ -16,6 +16,7 @@ struct ExampleWidget: GridWidget {
     var position: GridPosition = .zero
     let title: String
     let category: GridWidgetCategory
+    let type: String = "example"
     var isEnabled: Bool = true
     
     // Mock data properties

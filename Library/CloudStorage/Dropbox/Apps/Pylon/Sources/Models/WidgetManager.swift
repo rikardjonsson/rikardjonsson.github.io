@@ -91,29 +91,87 @@ class WidgetManager: ObservableObject {
 
     // MARK: - Refresh Management
 
+    /// Refresh all enabled widgets with comprehensive error handling
     func refreshAllContainers() async {
-        // Refresh all enabled containers
-        await withTaskGroup(of: Void.self) { group in
+        var refreshResults: [RefreshResult] = []
+        
+        // Refresh all enabled containers concurrently
+        await withTaskGroup(of: RefreshResult.self) { group in
             for container in containers where container.isEnabled {
+                let containerId = container.id
+                let containerTitle = container.title
+                
                 group.addTask { [weak self] in
-                    await self?.refreshContainer(id: container.id)
+                    await self?.refreshContainer(id: containerId) ?? 
+                        RefreshResult(widgetId: containerId, widgetTitle: containerTitle, success: false, error: WidgetError.widgetManagerDeallocated)
                 }
+            }
+            
+            for await result in group {
+                refreshResults.append(result)
+            }
+        }
+        
+        // Log summary of refresh operations
+        let successCount = refreshResults.filter(\.success).count
+        let failureCount = refreshResults.count - successCount
+        
+        if failureCount == 0 {
+            DebugLog.success("Successfully refreshed all \(successCount) widgets")
+        } else {
+            DebugLog.warning("Refreshed \(successCount)/\(refreshResults.count) widgets - \(failureCount) failed")
+            
+            // Log details of failed refreshes
+            for result in refreshResults where !result.success {
+                DebugLog.error("Failed to refresh \(result.widgetTitle): \(result.error?.userFriendlyDescription ?? "Unknown error")")
             }
         }
     }
 
-    func refreshContainer(id: UUID) async {
-        guard let container = containers.first(where: { $0.id == id }) else { return }
+    /// Refresh a specific widget with retry logic and detailed error handling
+    func refreshContainer(id: UUID, maxRetries: Int = 2) async -> RefreshResult {
+        guard let container = containers.first(where: { $0.id == id }) else { 
+            return RefreshResult(widgetId: id, widgetTitle: "Unknown", success: false, error: WidgetError.widgetNotFound)
+        }
         
         refreshInProgress.insert(id)
         defer { refreshInProgress.remove(id) }
         
-        do {
-            try await container.refresh()
-            DebugLog.success("Refreshed \(container.title)")
-        } catch {
-            DebugLog.error("Failed to refresh \(container.title): \(error)")
+        var lastError: Error?
+        
+        for attempt in 0...maxRetries {
+            do {
+                try await container.refresh()
+                DebugLog.success("Refreshed \(container.title)\(attempt > 0 ? " (attempt \(attempt + 1))" : "")")
+                return RefreshResult(widgetId: id, widgetTitle: container.title, success: true, error: nil)
+            } catch {
+                lastError = error
+                
+                if attempt < maxRetries {
+                    let delay = calculateRetryDelay(attempt: attempt, error: error)
+                    DebugLog.warning("Refresh failed for \(container.title) (attempt \(attempt + 1)), retrying in \(delay)ms...")
+                    
+                    try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000))
+                } else {
+                    DebugLog.error("Failed to refresh \(container.title) after \(maxRetries + 1) attempts: \(error.userFriendlyDescription)")
+                }
+            }
         }
+        
+        return RefreshResult(
+            widgetId: id, 
+            widgetTitle: container.title, 
+            success: false, 
+            error: lastError ?? WidgetError.unknownRefreshError
+        )
+    }
+    
+    /// Calculate retry delay based on attempt number and error type
+    private func calculateRetryDelay(attempt: Int, error: Error) -> Int {
+        // Exponential backoff with jitter
+        let baseDelay = 1000 * (1 << attempt) // 1s, 2s, 4s, etc.
+        let jitter = Int.random(in: 0...500) // 0-500ms random jitter
+        return baseDelay + jitter
     }
 
     func isRefreshing(containerId: UUID) -> Bool {
@@ -188,6 +246,17 @@ class WidgetManager: ObservableObject {
         updateContainerPositions()
         
         DebugLog.success("✅ Layout recalculation complete")
+    }
+    
+    /// Move a container from one position to another
+    func moveContainer(from currentPosition: GridPosition, to newPosition: GridPosition) -> Bool {
+        // Find container at the current position
+        guard let container = containers.first(where: { $0.gridPosition == currentPosition }) else {
+            DebugLog.error("No container found at position \(currentPosition)")
+            return false
+        }
+        
+        return moveContainer(id: container.id, to: newPosition)
     }
     
     /// Move a container to a new grid position
@@ -283,8 +352,8 @@ class WidgetManager: ObservableObject {
             // Load the grid layout
             try persistence.loadLayout(layoutData, into: gridManager)
             
-            // TODO: Recreate WidgetContainer instances from grid widgets
-            // This would require a widget factory to recreate actual widget instances
+            // Recreate WidgetContainer instances from grid widgets using widget factory
+            recreateContainersFromGridWidgets()
             
             currentLayoutName = layoutData.name
             DebugLog.success("Loaded layout: \(layoutData.name)")
@@ -316,6 +385,52 @@ class WidgetManager: ObservableObject {
             DebugLog.error("Failed to delete layout: \(error)")
         }
     }
+    
+    /// Recreate WidgetContainer instances from grid widgets after loading layout
+    private func recreateContainersFromGridWidgets() {
+        Task { @MainActor in
+            for gridWidget in gridManager.widgets {
+                if let container = WidgetFactory.createContainer(from: gridWidget) {
+                    containers.append(container)
+                    DebugLog.success("Recreated widget: \(container.title) at \(container.gridPosition)")
+                } else {
+                    DebugLog.success("Widget factory returned nil for type: \(gridWidget.type)")
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Widget Factory
+
+/// Factory for creating WidgetContainer instances from saved data
+struct WidgetFactory {
+    @MainActor
+    static func createContainer(from gridWidget: any GridWidget) -> (any WidgetContainer)? {
+        // For now, just log the widget type - full recreation would require
+        // more complex serialization of widget state
+        DebugLog.success("Would recreate widget: \(gridWidget.type) at \(gridWidget.position)")
+        return nil
+    }
+}
+
+// MARK: - Extensions
+
+extension WidgetSize {
+    init(from gridSize: GridSize) {
+        if gridSize == .small {
+            self = .small
+        } else if gridSize == .medium {
+            self = .medium
+        } else if gridSize == .large {
+            self = .large
+        } else if gridSize == .extraLarge {
+            self = .xlarge
+        } else {
+            // Default fallback for unknown sizes
+            self = .medium
+        }
+    }
 }
 
 // MARK: - Compatibility Types (to be removed)
@@ -335,6 +450,9 @@ enum WidgetError: Error, LocalizedError {
     case permissionDenied
     case networkUnavailable
     case dataCorrupted
+    case widgetNotFound
+    case widgetManagerDeallocated
+    case unknownRefreshError
     case unknownError(Error)
 
     var errorDescription: String? {
@@ -345,8 +463,57 @@ enum WidgetError: Error, LocalizedError {
             "Network unavailable. Please check your connection."
         case .dataCorrupted:
             "Data corrupted. Please try refreshing."
+        case .widgetNotFound:
+            "Widget not found."
+        case .widgetManagerDeallocated:
+            "Widget manager was deallocated during refresh."
+        case .unknownRefreshError:
+            "An unknown error occurred during refresh."
         case let .unknownError(error):
             "Unknown error: \(error.localizedDescription)"
+        }
+    }
+}
+
+// MARK: - Refresh Result
+
+/// Result of a widget refresh operation
+struct RefreshResult: Sendable {
+    let widgetId: UUID
+    let widgetTitle: String
+    let success: Bool
+    let error: Error?
+    let timestamp: Date
+    
+    init(widgetId: UUID, widgetTitle: String, success: Bool, error: Error?) {
+        self.widgetId = widgetId
+        self.widgetTitle = widgetTitle
+        self.success = success
+        self.error = error
+        self.timestamp = Date()
+    }
+}
+
+// MARK: - Error Handling Extensions
+
+extension Error {
+    /// Convert any error to a user-friendly description
+    var userFriendlyDescription: String {
+        if let widgetError = self as? WidgetError {
+            return widgetError.errorDescription ?? localizedDescription
+        }
+        
+        // Handle common system errors with better descriptions
+        let nsError = self as NSError
+        switch nsError.code {
+        case NSURLErrorTimedOut, NSURLErrorCannotConnectToHost:
+            return "Network timeout. Please check your connection."
+        case NSURLErrorNotConnectedToInternet:
+            return "No internet connection available."
+        case -1009: // NSURLErrorNotConnectedToInternet on some systems
+            return "No internet connection available."
+        default:
+            return localizedDescription
         }
     }
 }

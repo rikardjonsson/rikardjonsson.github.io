@@ -197,6 +197,9 @@ struct NativeWidgetContainer: View {
         case .large:
             EdgeInsets(top: NativeMacOSTheme.Spacing.lg, leading: NativeMacOSTheme.Spacing.lg, 
                       bottom: NativeMacOSTheme.Spacing.lg, trailing: NativeMacOSTheme.Spacing.lg)
+        case .xlarge:
+            EdgeInsets(top: NativeMacOSTheme.Spacing.xl, leading: NativeMacOSTheme.Spacing.xl, 
+                      bottom: NativeMacOSTheme.Spacing.xl, trailing: NativeMacOSTheme.Spacing.xl)
         }
     }
     
