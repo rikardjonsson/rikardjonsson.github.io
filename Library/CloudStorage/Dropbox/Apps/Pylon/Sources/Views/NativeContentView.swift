@@ -61,6 +61,16 @@ struct NativeContentView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
                 
+                // Theme preferences button - native style
+                Button {
+                    appState.showThemePreferences()
+                } label: {
+                    Label("Themes", systemImage: "paintbrush")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.regular)
+                .help("Theme Preferences")
+                
                 // Refresh button - native style  
                 Button {
                     Task {

@@ -11,8 +11,10 @@ import SwiftUI
 /// Native macOS design system following Apple's Human Interface Guidelines
 struct NativeMacOSTheme: Theme {
     let name = "macOS Native"
+    let id = "native-macos"
+    let category = ThemeCategory.native
     
-    // MARK: - Native macOS Materials & Colors
+    // Core Visual Properties
     let backgroundMaterial = Material.regularMaterial
     let backgroundColor = Color.clear
     let primaryColor = Color.primary
@@ -23,19 +25,55 @@ struct NativeMacOSTheme: Theme {
     let textPrimary = Color.primary
     let textSecondary = Color.secondary
     
-    // Native macOS Design System Extensions
-    let depthLayer1 = Material.regularMaterial      // Primary content
-    let depthLayer2 = Material.thinMaterial         // Secondary content  
-    let depthLayer3 = Material.ultraThinMaterial    // Background
-    let ambientGlow = Color.accentColor       // System accent for highlights
-    let contextualAccent = Color.accentColor  // Follows system accent
-    let fluidCornerRadius: CGFloat = 8.0      // macOS standard corner radius
+    // Enhanced Design System
+    let depthLayer1 = Material.regularMaterial
+    let depthLayer2 = Material.thinMaterial
+    let depthLayer3 = Material.ultraThinMaterial
+    let ambientGlow = Color.accentColor
+    let contextualAccent = Color.accentColor
+    let fluidCornerRadius: CGFloat = 8.0
     
-    // MARK: - Native macOS Color Palette
+    // Advanced Visual Properties
+    let shadowColor = Color.black.opacity(0.15)
+    let borderColor = Color.primary.opacity(0.2)
+    let errorColor = Color(NSColor.systemRed)
+    let warningColor = Color(NSColor.systemOrange)
+    let successColor = Color(NSColor.systemGreen)
+    let focusColor = Color.accentColor
+    
+    // Semantic Surfaces (using computed properties for dynamic system colors)
     var surfacePrimary: Color { Color(NSColor.controlBackgroundColor) }
     var surfaceSecondary: Color { Color(NSColor.alternatingContentBackgroundColors[0]) }
     var surfaceTertiary: Color { Color(NSColor.alternatingContentBackgroundColors[1]) }
     
+    // Interactive States
+    let interactiveDefault = Color.accentColor
+    let interactiveHover = Color.accentColor.opacity(0.8)
+    let interactivePressed = Color.accentColor.opacity(1.2)
+    let interactiveDisabled = Color.secondary.opacity(0.4)
+    
+    // Typography Colors
+    let textTertiary = Color(NSColor.tertiaryLabelColor)
+    let textQuaternary = Color(NSColor.quaternaryLabelColor)
+    let textLink = Color.accentColor
+    let textOnAccent = Color.white
+    
+    // Animation Properties
+    let transitionDuration: Double = 0.25
+    let springResponse: Double = 0.4
+    let springDamping: Double = 0.8
+    
+    // Layout Properties
+    let baseSpacing: CGFloat = 8
+    let compactSpacing: CGFloat = 4
+    let comfortableSpacing: CGFloat = 12
+    
+    // Visual Effects
+    let blurRadius: CGFloat = 8
+    let shadowRadius: CGFloat = 4
+    let shadowOpacity: Double = 0.15
+    
+    // MARK: - Native macOS Extended Color Palette
     // Semantic colors that adapt to light/dark mode
     var labelPrimary: Color { Color(NSColor.labelColor) }
     var labelSecondary: Color { Color(NSColor.secondaryLabelColor) }

@@ -13,9 +13,11 @@ struct ContentView: View {
 
     var body: some View {
         // Always use native macOS content view with TetrisGrid
-        // TODO: Implement theme-specific styling within NativeContentView
         NativeContentView()
             .environment(\.theme, appState.selectedTheme)
+            .sheet(isPresented: $appState.showingThemePreferences) {
+                ThemePreferencesView()
+            }
     }
     
     // MARK: - Legacy Content View (for non-native themes)

@@ -16,9 +16,13 @@ class AppState: ObservableObject {
     @Published var isKeyboardNavigationEnabled = true
     @Published var layoutConfiguration: LayoutConfiguration = .grid3Column
     @Published var isRefreshing = false
+    
+    // Enhanced theme management
+    @Published var themeManager = ThemeManager()
+    @Published var showingThemePreferences = false
 
     var selectedTheme: any Theme {
-        selectedThemeType.theme
+        themeManager.currentTheme
     }
     
     // Legacy support for existing code
@@ -44,6 +48,7 @@ class AppState: ObservableObject {
         setupInitialWidgets()
         setupAutoSave()
         setupStatePersistence()
+        setupThemeManager()
         
         // Remove circular reference that can cause AttributeGraph crashes
         // The @Published widgetManager will automatically notify views of changes
@@ -109,23 +114,26 @@ class AppState: ObservableObject {
     }
 
     func toggleTheme() {
-        switch selectedThemeType {
-        case .nativeMacOS:
-            selectedThemeType = .surveillance
-        case .surveillance:
-            selectedThemeType = .modern
-        case .modern:
-            selectedThemeType = .dark
-        case .dark:
-            selectedThemeType = .light
-        case .light:
-            selectedThemeType = .system
-        case .system:
-            selectedThemeType = .nativeMacOS
-        }
+        let allThemeTypes = ThemeType.allCases
+        let currentIndex = allThemeTypes.firstIndex(of: selectedThemeType) ?? 0
+        let nextIndex = (currentIndex + 1) % allThemeTypes.count
+        let nextThemeType = allThemeTypes[nextIndex]
+        
+        selectedThemeType = nextThemeType
+        themeManager.switchTheme(to: nextThemeType.theme, animated: true)
         
         // Save theme immediately when changed
         layoutPersistence.saveTheme(selectedThemeType)
+    }
+    
+    func showThemePreferences() {
+        showingThemePreferences = true
+    }
+    
+    func switchToTheme(_ themeType: ThemeType, animated: Bool = true) {
+        selectedThemeType = themeType
+        themeManager.switchTheme(to: themeType.theme, animated: animated)
+        layoutPersistence.saveTheme(themeType)
     }
     
     // MARK: - State Persistence
@@ -186,6 +194,17 @@ class AppState: ObservableObject {
                 self?.saveAppState()
             }
             .store(in: &cancellables)
+    }
+    
+    private func setupThemeManager() {
+        // Load saved theme and apply it to theme manager
+        let savedTheme = themeManager.loadSavedTheme()
+        themeManager.currentTheme = savedTheme
+        
+        // Find corresponding ThemeType
+        if let themeType = ThemeType.allCases.first(where: { $0.theme.id == savedTheme.id }) {
+            selectedThemeType = themeType
+        }
     }
     
     private func updateWidgetManagerConfiguration() {
