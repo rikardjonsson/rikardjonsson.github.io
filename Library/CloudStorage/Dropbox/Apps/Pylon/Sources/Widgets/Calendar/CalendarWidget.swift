@@ -677,10 +677,11 @@ final class CalendarContent: WidgetContent, ObservableObject {
 // MARK: - Configuration View
 
 struct CalendarConfigurationView: View {
-    @StateObject private var calendarService = CalendarService()
     @State private var authorizationStatus: CalendarAuthorizationStatus = .notDetermined
     @State private var availableCalendars: [EKCalendar] = []
     @State private var selectedCalendarIDs: Set<String> = []
+    
+    private let calendarService = CalendarService()
     
     var body: some View {
         ScrollView {
