@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Soft Pulse — Constellation</title>
+
+    <!-- Preconnect to Google Fonts for faster loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Load fonts in HTML for better performance -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="styles/main.css" />
+  </head>
+  <body>
+    <canvas id="starfield" aria-hidden="true"></canvas>
+
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand__band">Soft Pulse</span>
+        <span class="brand__divider">presents</span>
+        <span class="brand__album">Constellation</span>
+      </div>
+      <div class="header-buttons">
+        <button class="header-button" id="guide-button" aria-label="Keyboard shortcuts guide">Guide</button>
+        <button class="header-button" id="about-button" aria-label="About Soft Pulse">About</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="starmap" aria-label="Album song map">
+        <svg id="starmap-canvas" viewBox="0 0 1000 1000" role="presentation"></svg>
+      </section>
+
+      <aside class="sidebar">
+        <div class="sidebar__section">
+          <h2 class="sidebar__title">Constellation Patterns</h2>
+          <div class="layout-controls" role="group" aria-label="Starmap layout modes">
+            <button class="layout-button is-active" data-layout="constellations">
+              Zodiac Weave
+            </button>
+            <button class="layout-button" data-layout="helix">
+              Spiral Helix
+            </button>
+            <button class="layout-button" data-layout="scatter">
+              Lunar Drift
+            </button>
+            <button class="layout-button" data-layout="tempo-spiral">
+              Tempo Ascendant
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar__divider" aria-hidden="true"></div>
+
+        <div class="sidebar__section track-meta" aria-live="polite">
+          <h2 class="sidebar__title">Track Insight</h2>
+          <div class="track-meta__content" id="track-meta">
+            <p class="track-meta__placeholder">
+              Hover or tap a node to pull a thread from the album.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <div class="player-shell">
+        <div class="custom-player">
+          <button class="player-control" id="play-pause-btn" aria-label="Play/Pause">
+            <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+            </svg>
+          </button>
+
+          <div class="player-info">
+            <div class="track-title" id="current-track-title">Select a track</div>
+            <div class="track-time">
+              <span id="current-time">0:00</span>
+              <span class="time-separator">/</span>
+              <span id="duration">0:00</span>
+            </div>
+          </div>
+
+          <div class="progress-container">
+            <div class="progress-bar" id="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+              <div class="progress-handle" id="progress-handle"></div>
+            </div>
+          </div>
+
+          <audio id="audio-player" preload="metadata"></audio>
+
+          <!-- Hidden SoundCloud widget for streaming -->
+          <iframe
+            id="sc-widget"
+            width="0"
+            height="0"
+            scrolling="no"
+            frameborder="no"
+            allow="autoplay"
+            src=""
+            style="display: none;"
+          ></iframe>
+        </div>
+      </div>
+    </footer>
+
+    <!-- About Modal -->
+    <div class="about-overlay" id="about-overlay" aria-modal="true" role="dialog" aria-labelledby="about-title">
+      <div class="about-backdrop" id="about-backdrop"></div>
+      <div class="about-modal">
+        <button class="about-close" id="about-close" aria-label="Close about dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+        <div class="about-content">
+          <h2 id="about-title">Soft Pulse</h2>
+          <p>Soft Pulse is a dream-pop project based in Berlin, formed by Annabel Padley and Rikard Jönsson. Inspired by life in the city, the duo crafts lush, dreamy soundscapes with melodic hooks and energetic synth lines, exploring the themes of relationships, emotional exchange, and modern life; in short, what it means to be human today.</p>
+          <p>Their debut album 'Constellation' is a 40-minute narrative that explores how the world can be perceived and what draws us closer to or further away from one another.</p>
+          <p>Annabel and Rikard first met while working at the music-tech company Ableton, but Soft Pulse didn't take shape until after they had both moved on. The project began with an Instagram story where Rikard asked if anyone wanted to make "sexy pop music in the style of Sade and Roxy Music." One DM led to lunch, and within weeks, a body of work started to form.</p>
+          <p>Soft Pulse is a genuinely collaborative project. Both Annabel and Rikard are multi-instrumentalists, approaching songwriting and production with an open "yes-man" attitude, where every idea is explored and refined together. This shared approach gives the music its balance; equal parts intuitive, emotional, and meticulously crafted.</p>
+          <p>The album was recorded at Circle Studios and Brewery Studios in Berlin, and features Jack Savidge from Friendly Fires on drums.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guide Modal -->
+    <div class="guide-overlay" id="guide-overlay" aria-modal="true" role="dialog" aria-labelledby="guide-title">
+      <div class="guide-backdrop" id="guide-backdrop"></div>
+      <div class="guide-modal">
+        <button class="guide-close" id="guide-close" aria-label="Close guide dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+        <div class="guide-content">
+          <h2 id="guide-title">Navigation Guide</h2>
+          <div class="guide-section">
+            <h3>Playback Controls</h3>
+            <div class="guide-item">
+              <kbd>Space</kbd>
+              <span>Play / Pause</span>
+            </div>
+            <div class="guide-item">
+              <kbd>←</kbd>
+              <kbd>→</kbd>
+              <span>Previous / Next track</span>
+            </div>
+          </div>
+          <div class="guide-section">
+            <h3>Constellation Patterns</h3>
+            <div class="guide-item">
+              <kbd>↑</kbd>
+              <span>Next pattern (cycle forward)</span>
+            </div>
+            <div class="guide-item">
+              <kbd>↓</kbd>
+              <span>Previous pattern (cycle backward)</span>
+            </div>
+          </div>
+          <div class="guide-section">
+            <h3>Interaction</h3>
+            <div class="guide-item">
+              <span class="guide-action">Hover</span>
+              <span>View track details</span>
+            </div>
+            <div class="guide-item">
+              <span class="guide-action">Click</span>
+              <span>Play track</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://w.soundcloud.com/player/api.js"></script>
+    <script type="module" src="scripts/main.js"></script>
+  </body>
+</html>
