@@ -2149,6 +2149,7 @@ iframe {
     font-size: 20px;
     color: var(--text-primary);
     font-weight: 400;
+    transition: opacity 200ms var(--ease-smooth);
   }
 
   body.is-mobile .radio-station__stats {
@@ -2184,6 +2185,7 @@ iframe {
     font-size: 14px;
     color: var(--text-primary);
     opacity: 0.9;
+    transition: opacity 200ms var(--ease-smooth);
   }
 
   body.is-mobile .radio-station__stat-bar {

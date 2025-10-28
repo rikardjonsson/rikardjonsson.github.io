@@ -172,8 +172,93 @@ export function updatePlayingCard(trackId, tracks = null, layoutName = 'Zodiac W
   const track = tracks.find(t => t.id === trackId);
   if (!track) return null;
 
-  // Re-render the entire station view with the new track
-  return renderMobileTracklist(tracks, container, trackId, layoutName);
+  // Check if station view already exists
+  const existingStation = container.querySelector('.radio-station');
+
+  if (!existingStation) {
+    // First time - render full view
+    return renderMobileTracklist(tracks, container, trackId, layoutName);
+  }
+
+  // Update only the data that changes, not titles
+  updateStationData(existingStation, track, layoutName);
+
+  return existingStation;
+}
+
+/**
+ * Update station data without re-rendering titles
+ */
+function updateStationData(stationView, track, layoutName) {
+  const displayNumber = Number.isFinite(track.trackNumber) ? track.trackNumber : '—';
+  const duration = track.duration || '0:00';
+  const bpm = Number.isFinite(track.bpm) ? track.bpm : '—';
+  const key = track.key || '—';
+  const focusValue = clamp01(track.focusValue, 0.5);
+  const pulseValue = clamp01(track.pulseValue, 0.5);
+  const focusPercent = Math.round(focusValue * 100);
+  const pulsePercent = Math.round(pulseValue * 100);
+  const focusLabel = track.focus || 'Focus';
+  const pulseLabel = track.pulse || 'Pulse';
+
+  // Get key-based colors
+  const colors = getKeyColors(track.key);
+  const rgb = hexToRgb(colors.coreInner);
+
+  // Update CSS custom properties
+  stationView.style.setProperty('--station-color', colors.coreInner);
+  stationView.style.setProperty('--station-color-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+  stationView.dataset.trackId = track.id;
+
+  // Update station name (without fade)
+  const stationNameEl = stationView.querySelector('.radio-station__station-name');
+  if (stationNameEl && stationNameEl.textContent !== layoutName) {
+    stationNameEl.textContent = layoutName;
+  }
+
+  // Update track title (without fade)
+  const titleEl = stationView.querySelector('.radio-station__title');
+  if (titleEl && titleEl.textContent !== track.title) {
+    titleEl.textContent = track.title;
+  }
+
+  // Update meta values with smooth transitions
+  const metaItems = stationView.querySelectorAll('.radio-station__meta-item');
+  const metaValues = [duration, bpm, key, displayNumber];
+  metaItems.forEach((item, index) => {
+    const valueEl = item.querySelector('.radio-station__meta-value');
+    if (valueEl) {
+      valueEl.style.opacity = '0.5';
+      setTimeout(() => {
+        valueEl.textContent = metaValues[index];
+        valueEl.style.opacity = '1';
+      }, 150);
+    }
+  });
+
+  // Update focus stat
+  const focusStatName = stationView.querySelector('.radio-station__stat:first-child .radio-station__stat-name');
+  const focusFill = stationView.querySelector('.radio-station__stat:first-child .radio-station__stat-fill');
+  if (focusStatName && focusFill) {
+    focusStatName.style.opacity = '0.5';
+    setTimeout(() => {
+      focusStatName.textContent = `${focusLabel} (${focusPercent}%)`;
+      focusStatName.style.opacity = '1';
+    }, 150);
+    focusFill.style.width = `${focusPercent}%`;
+  }
+
+  // Update pulse stat
+  const pulseStatName = stationView.querySelector('.radio-station__stat:last-child .radio-station__stat-name');
+  const pulseFill = stationView.querySelector('.radio-station__stat:last-child .radio-station__stat-fill');
+  if (pulseStatName && pulseFill) {
+    pulseStatName.style.opacity = '0.5';
+    setTimeout(() => {
+      pulseStatName.textContent = `${pulseLabel} (${pulsePercent}%)`;
+      pulseStatName.style.opacity = '1';
+    }, 150);
+    pulseFill.style.width = `${pulsePercent}%`;
+  }
 }
 
 /**
