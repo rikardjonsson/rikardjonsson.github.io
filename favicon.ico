@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ffd7f1;stop-opacity:0.9" />
+      <stop offset="50%" style="stop-color:#c7a6ff;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#c7a6ff;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Dark background -->
+  <rect width="32" height="32" fill="#04000a"/>
+
+  <!-- Constellation pattern - simple 4-point star formation -->
+  <!-- Top star -->
+  <circle cx="16" cy="8" r="1.5" fill="#f7eef6"/>
+  <circle cx="16" cy="8" r="2.5" fill="url(#glow)" opacity="0.4"/>
+
+  <!-- Left star -->
+  <circle cx="10" cy="16" r="1.2" fill="#f7eef6"/>
+  <circle cx="10" cy="16" r="2" fill="url(#glow)" opacity="0.3"/>
+
+  <!-- Center star (brightest) -->
+  <circle cx="16" cy="16" r="1.8" fill="#ffd7f1"/>
+  <circle cx="16" cy="16" r="3" fill="url(#glow)" opacity="0.5"/>
+
+  <!-- Right star -->
+  <circle cx="22" cy="16" r="1.2" fill="#f7eef6"/>
+  <circle cx="22" cy="16" r="2" fill="url(#glow)" opacity="0.3"/>
+
+  <!-- Bottom star -->
+  <circle cx="16" cy="24" r="1.5" fill="#f7eef6"/>
+  <circle cx="16" cy="24" r="2.5" fill="url(#glow)" opacity="0.4"/>
+
+  <!-- Connecting lines (constellation) -->
+  <line x1="16" y1="8" x2="10" y2="16" stroke="#c7a6ff" stroke-width="0.3" opacity="0.4"/>
+  <line x1="16" y1="8" x2="16" y2="16" stroke="#c7a6ff" stroke-width="0.3" opacity="0.4"/>
+  <line x1="16" y1="8" x2="22" y2="16" stroke="#c7a6ff" stroke-width="0.3" opacity="0.4"/>
+  <line x1="10" y1="16" x2="16" y2="16" stroke="#c7a6ff" stroke-width="0.3" opacity="0.4"/>
+  <line x1="16" y1="16" x2="22" y2="16" stroke="#c7a6ff" stroke-width="0.3" opacity="0.4"/>
+  <line x1="10" y1="16" x2="16" y2="24" stroke="#c7a6ff" stroke-width="0.3" opacity="0.4"/>
+  <line x1="16" y1="16" x2="16" y2="24" stroke="#c7a6ff" stroke-width="0.3" opacity="0.4"/>
+  <line x1="22" y1="16" x2="16" y2="24" stroke="#c7a6ff" stroke-width="0.3" opacity="0.4"/>
+</svg>
