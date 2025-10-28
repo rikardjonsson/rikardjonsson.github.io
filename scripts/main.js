@@ -29,6 +29,7 @@ import {
 import {
   initMobileTracklist,
   updatePlayingCard,
+  getLayoutName,
 } from './mobile-tracklist.js';
 import {
   SoundCloudPlayer,
@@ -465,10 +466,11 @@ async function loadAlbum() {
     applyLayout(state.layout);
     setInitialTrack(defaultTrack);
 
-    // Initialize mobile tracklist if on mobile
+    // Initialize mobile radio station if on mobile
     if (state.isMobile) {
       const activeId = state.playingId ?? state.defaultTrackId;
-      initMobileTracklist(album.tracks, handleTrackSelection, activeId);
+      const layoutName = getLayoutName(state.layout);
+      initMobileTracklist(album.tracks, handleTrackSelection, activeId, layoutName);
     }
 
     console.log("✅ Album loaded:", album.tracks.length, "tracks");
@@ -679,6 +681,12 @@ function applyLayout(layoutId) {
   }
 
   console.log("✅ Applied layout:", layoutId, `(${positionedCount}/${tracks.length} nodes positioned)`);
+
+  // Update mobile radio station with new layout name
+  if (state.isMobile && state.playingId && state.album) {
+    const layoutName = getLayoutName(layoutId);
+    updatePlayingCard(state.playingId, state.album.tracks, layoutName);
+  }
 }
 
 function setActiveLayoutButton(layoutId) {
@@ -888,9 +896,10 @@ function handleTrackSelection(trackId) {
   updateMeta(track, true);
   toggleTrackPlayback(trackId);
 
-  // Update mobile tracklist playing state
-  if (state.isMobile) {
-    updatePlayingCard(trackId);
+  // Update mobile radio station display
+  if (state.isMobile && state.album) {
+    const layoutName = getLayoutName(state.layout);
+    updatePlayingCard(trackId, state.album.tracks, layoutName);
   }
 }
 
@@ -1039,8 +1048,9 @@ function setActiveNode(trackId) {
 
   state.playingId = trackId;
 
-  if (state.isMobile) {
-    updatePlayingCard(trackId ?? null);
+  if (state.isMobile && state.album && trackId) {
+    const layoutName = getLayoutName(state.layout);
+    updatePlayingCard(trackId, state.album.tracks, layoutName);
   }
 
   const nodeData = trackId ? getNode(trackId) : null;
@@ -1418,7 +1428,8 @@ function setMobileMode(isMobile) {
 
     if (state.album) {
       const activeId = state.playingId ?? state.defaultTrackId;
-      initMobileTracklist(state.album.tracks, handleTrackSelection, activeId);
+      const layoutName = getLayoutName(state.layout);
+      initMobileTracklist(state.album.tracks, handleTrackSelection, activeId, layoutName);
     }
   } else {
     document.body.classList.remove('mobile-view-constellation', 'mobile-view-insight');
